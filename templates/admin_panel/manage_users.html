@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block title %}Manage Users – UniSports Tickets{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+
+    <!-- Sidebar (reuse admin sidebar) -->
+    <div class="col-auto sidebar" style="width:240px;">
+      <div class="text-center mb-4 pt-2">
+        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2"
+             style="width:48px;height:48px;background:linear-gradient(135deg,#ef4444,#b91c1c);font-size:1.2rem;font-weight:800;">
+          {{ user.username|first|upper }}
+        </div>
+        <div class="fw-bold" style="font-size:.9rem;">{{ user.username }}</div>
+        <span class="status-pill status-cancelled">Administrator</span>
+      </div>
+      <nav class="nav flex-column">
+        <a href="{% url 'admin_dashboard' %}" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="{% url 'create_match' %}"    class="nav-link"><i class="bi bi-plus-circle-fill"></i> Create Match</a>
+        <a href="{% url 'manage_users' %}"    class="nav-link active"><i class="bi bi-people-fill"></i> Manage Users</a>
+        <a href="{% url 'all_bookings' %}"    class="nav-link"><i class="bi bi-ticket-perforated-fill"></i> All Bookings</a>
+        <hr style="border-color:var(--card-border);">
+        <a href="/admin/" class="nav-link" target="_blank"><i class="bi bi-gear-fill"></i> Django Admin</a>
+        <a href="{% url 'home' %}" class="nav-link"><i class="bi bi-globe"></i> View Site</a>
+        <a href="{% url 'logout' %}" class="nav-link" style="color:var(--danger)!important;"><i class="bi bi-box-arrow-right"></i> Logout</a>
+      </nav>
+    </div>
+
+    <!-- Main -->
+    <div class="col py-4 px-4">
+      <h1 class="h3 fw-bold mb-4">
+        <i class="bi bi-people-fill me-2 text-warning"></i>Manage Users
+      </h1>
+
+      <div class="card">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Username</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Joined</th>
+                <th class="text-end">Change Role</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for u in users %}
+                <tr>
+                  <td class="text-muted" style="font-size:.8rem;">{{ u.id }}</td>
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                           style="width:32px;height:32px;font-size:.8rem;font-weight:700;
+                           background:linear-gradient(135deg,var(--primary),#7c3aed);">
+                        {{ u.username|first|upper }}
+                      </div>
+                      <span class="fw-600">{{ u.username }}</span>
+                      {% if u.is_superuser %}<span class="badge bg-danger ms-1">super</span>{% endif %}
+                    </div>
+                  </td>
+                  <td style="color:var(--muted);font-size:.88rem;">{{ u.get_full_name|default:"—" }}</td>
+                  <td style="color:var(--muted);font-size:.83rem;">{{ u.email|default:"—" }}</td>
+                  <td>
+                    {% if u.profile %}
+                      <span class="status-pill
+                        {% if u.profile.role == 'admin' %}status-cancelled
+                        {% elif u.profile.role == 'staff' %}status-pending
+                        {% else %}status-published{% endif %}">
+                        {{ u.profile.get_role_display }}
+                      </span>
+                    {% else %}
+                      <span class="status-pill status-hidden">No Profile</span>
+                    {% endif %}
+                  </td>
+                  <td style="font-size:.82rem;color:var(--muted);">{{ u.date_joined|date:"d M Y" }}</td>
+                  <td class="text-end">
+                    {% if not u.is_superuser %}
+                      <form method="post" action="{% url 'change_user_role' u.id %}"
+                            class="d-flex gap-1 justify-content-end align-items-center">
+                        {% csrf_token %}
+                        <select name="role" class="form-select form-select-sm"
+                                style="width:120px;font-size:.8rem;">
+                          <option value="client"
+                            {% if u.profile and u.profile.role == 'client' %}selected{% endif %}>Client</option>
+                          <option value="staff"
+                            {% if u.profile and u.profile.role == 'staff' %}selected{% endif %}>Staff</option>
+                          <option value="admin"
+                            {% if u.profile and u.profile.role == 'admin' %}selected{% endif %}>Admin</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary btn-sm">
+                          <i class="bi bi-check-lg"></i>
+                        </button>
+                      </form>
+                    {% else %}
+                      <span style="color:var(--muted);font-size:.8rem;">Superuser</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="7" class="text-center py-4" style="color:var(--muted);">No users found.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /col -->
+  </div><!-- /row -->
+</div>
+{% endblock %}

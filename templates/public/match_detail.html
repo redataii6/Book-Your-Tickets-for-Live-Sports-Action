@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% block title %}{{ match.title }} – UniSports Tickets{% endblock %}
+{% block meta_description %}{{ match.title }}: {{ match.home_team }} vs {{ match.away_team }} on {{ match.date }} at {{ match.location }}.{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb" style="background:none;padding:0;font-size:.85rem;">
+      <li class="breadcrumb-item"><a href="{% url 'home' %}" style="color:#818cf8;">Home</a></li>
+      <li class="breadcrumb-item active" style="color:var(--muted);">Match Detail</li>
+    </ol>
+  </nav>
+
+  <div class="row g-4">
+
+    <!-- ── LEFT: Match Info ── -->
+    <div class="col-12 col-lg-8">
+      <div class="card">
+
+        <!-- Match image / banner -->
+        {% if match.image %}
+          <img src="{{ match.image.url }}" class="match-img" alt="{{ match.title }}"
+               style="height:280px;border-radius:var(--radius) var(--radius) 0 0;">
+        {% else %}
+          <div class="match-img-placeholder" style="height:280px;border-radius:var(--radius) var(--radius) 0 0;font-size:6rem;">
+            {% if match.sport_type == 'football' %}⚽{% else %}🏀{% endif %}
+          </div>
+        {% endif %}
+
+        <div class="card-body p-4">
+
+          <!-- Sport + Status -->
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            <span class="sport-pill sport-{{ match.sport_type }}">
+              {% if match.sport_type == 'football' %}⚽{% else %}🏀{% endif %}
+              {{ match.get_sport_type_display }}
+            </span>
+            <span class="status-pill status-{{ match.status }}">{{ match.get_status_display }}</span>
+          </div>
+
+          <!-- Title -->
+          <h1 class="h2 fw-bold mb-1">{{ match.title }}</h1>
+          <!-- Teams vs -->
+          <p class="fs-5 mb-4" style="color:var(--muted);">
+            <strong class="text-light">{{ match.home_team }}</strong>
+            <span class="mx-2" style="color:#818cf8;">vs</span>
+            <strong class="text-light">{{ match.away_team }}</strong>
+          </p>
+
+          <!-- Info Grid -->
+          <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+              <div class="p-3 rounded-3 text-center" style="background:rgba(79,70,229,.1);">
+                <i class="bi bi-calendar-event fs-4 mb-1" style="color:#818cf8;"></i>
+                <div class="fw-700" style="font-size:.95rem;">{{ match.date|date:"d M Y" }}</div>
+                <div style="font-size:.75rem;color:var(--muted);">Date</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="p-3 rounded-3 text-center" style="background:rgba(79,70,229,.1);">
+                <i class="bi bi-clock fs-4 mb-1" style="color:#818cf8;"></i>
+                <div class="fw-700" style="font-size:.95rem;">{{ match.time|time:"H:i" }}</div>
+                <div style="font-size:.75rem;color:var(--muted);">Kick-off</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="p-3 rounded-3 text-center" style="background:rgba(79,70,229,.1);">
+                <i class="bi bi-geo-alt-fill fs-4 mb-1" style="color:#818cf8;"></i>
+                <div class="fw-700" style="font-size:.9rem;">{{ match.location }}</div>
+                <div style="font-size:.75rem;color:var(--muted);">Venue</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="p-3 rounded-3 text-center" style="background:rgba(79,70,229,.1);">
+                <i class="bi bi-people-fill fs-4 mb-1" style="color:#818cf8;"></i>
+                <div class="fw-700" style="font-size:.95rem;">{{ match.available_seats }}</div>
+                <div style="font-size:.75rem;color:var(--muted);">Seats Left</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Description -->
+          {% if match.description %}
+            <h5 class="fw-bold mb-2">About This Match</h5>
+            <p style="color:var(--muted);line-height:1.7;">{{ match.description }}</p>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ── RIGHT: Booking Panel ── -->
+    <div class="col-12 col-lg-4">
+      <div class="card sticky-top" style="top:90px;">
+        <div class="card-header p-4">
+          <h5 class="mb-0 fw-bold">
+            <i class="bi bi-ticket-perforated-fill me-2" style="color:var(--accent);"></i>
+            Ticket Booking
+          </h5>
+        </div>
+        <div class="card-body p-4">
+
+          <!-- Price -->
+          <div class="d-flex justify-content-between align-items-center mb-3 pb-3"
+               style="border-bottom:1px solid var(--card-border);">
+            <span style="color:var(--muted);">Price per ticket</span>
+            <span style="font-size:1.6rem;font-weight:800;color:#818cf8;">${{ match.price }}</span>
+          </div>
+
+          <!-- Available seats bar -->
+          <div class="mb-4">
+            <div class="d-flex justify-content-between mb-1" style="font-size:.82rem;color:var(--muted);">
+              <span>Availability</span>
+              <span>{{ match.available_seats }} / {{ match.total_seats }}</span>
+            </div>
+            <div class="progress" style="height:8px;background:var(--card-border);border-radius:10px;">
+              {% widthratio match.available_seats match.total_seats 100 as pct %}
+              <div class="progress-bar" role="progressbar"
+                   style="width:{{ pct }}%;background:linear-gradient(90deg,#818cf8,#c084fc);">
+              </div>
+            </div>
+          </div>
+
+          {% if user.is_authenticated %}
+
+            {% if user_booking %}
+              <!-- Already booked -->
+              <div class="alert mb-3" style="background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);color:#34d399;">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                You have booked <strong>{{ user_booking.quantity }}</strong> ticket{{ user_booking.quantity|pluralize }} for this match!
+              </div>
+              <a href="{% url 'my_tickets' %}" class="btn btn-success w-100">
+                <i class="bi bi-ticket-perforated-fill me-1"></i> View My Tickets
+              </a>
+
+            {% elif match.available_seats == 0 %}
+              <!-- Sold out -->
+              <div class="alert" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;">
+                <i class="bi bi-x-circle-fill me-2"></i> This match is sold out.
+              </div>
+
+            {% elif form %}
+              <!-- Booking form -->
+              <form method="post" action="{% url 'book_ticket' match.pk %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                  <label class="form-label">{{ form.quantity.label }}</label>
+                  {{ form.quantity }}
+                  {% if form.quantity.errors %}
+                    <div class="text-danger small mt-1">{{ form.quantity.errors.0 }}</div>
+                  {% endif %}
+                </div>
+                <p style="color:var(--muted);font-size:.83rem;" class="mb-3">
+                  Max 10 tickets per booking.
+                </p>
+                <button type="submit" class="btn btn-primary w-100 py-2"
+                        id="btn-book">
+                  <i class="bi bi-bag-check-fill me-1"></i> Confirm Booking
+                </button>
+              </form>
+
+            {% endif %}
+
+          {% else %}
+            <!-- Not logged in -->
+            <p style="color:var(--muted);" class="mb-3">
+              You need an account to book tickets.
+            </p>
+            <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary w-100 mb-2">
+              <i class="bi bi-box-arrow-in-right me-1"></i> Login to Book
+            </a>
+            <a href="{% url 'register' %}" class="btn btn-outline-light w-100">
+              Create Free Account
+            </a>
+          {% endif %}
+
+        </div>
+
+        {% if user.is_authenticated and user.is_superuser or user.is_authenticated and user.profile.role == 'admin' %}
+          <div class="card-footer p-3">
+            <div class="d-flex gap-2">
+              <a href="{% url 'edit_match' match.pk %}" class="btn btn-warning btn-sm flex-grow-1">
+                <i class="bi bi-pencil-fill me-1"></i> Edit
+              </a>
+              <a href="{% url 'delete_match' match.pk %}" class="btn btn-danger btn-sm flex-grow-1">
+                <i class="bi bi-trash-fill me-1"></i> Delete
+              </a>
+            </div>
+          </div>
+        {% endif %}
+
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Live price calculation
+  const qtyInput  = document.querySelector('[name="quantity"]');
+  const pricePerTicket = {{ match.price }};
+  const bookBtn   = document.getElementById('btn-book');
+
+  if (qtyInput && bookBtn) {
+    qtyInput.addEventListener('input', function () {
+      const total = (parseFloat(pricePerTicket) * parseInt(this.value || 0)).toFixed(2);
+      bookBtn.textContent = `Confirm Booking — $${total}`;
+    });
+  }
+</script>
+{% endblock %}

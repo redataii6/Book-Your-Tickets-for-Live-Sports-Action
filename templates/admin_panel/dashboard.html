@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard – UniSports Tickets{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+
+    <!-- ── Sidebar ── -->
+    <div class="col-auto sidebar" style="width:240px;">
+      <div class="text-center mb-4 pt-2">
+        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2"
+             style="width:48px;height:48px;background:linear-gradient(135deg,#ef4444,#b91c1c);
+                    font-size:1.2rem;font-weight:800;">
+          {{ user.username|first|upper }}
+        </div>
+        <div class="fw-bold" style="font-size:.9rem;">{{ user.username }}</div>
+        <span class="status-pill status-cancelled">Administrator</span>
+      </div>
+
+      <nav class="nav flex-column">
+        <a href="{% url 'admin_dashboard' %}"
+           class="nav-link active"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="{% url 'create_match' %}"
+           class="nav-link"><i class="bi bi-plus-circle-fill"></i> Create Match</a>
+        <a href="{% url 'manage_users' %}"
+           class="nav-link"><i class="bi bi-people-fill"></i> Manage Users</a>
+        <a href="{% url 'all_bookings' %}"
+           class="nav-link"><i class="bi bi-ticket-perforated-fill"></i> All Bookings</a>
+        <hr style="border-color:var(--card-border);">
+        <a href="/admin/" class="nav-link" target="_blank">
+          <i class="bi bi-gear-fill"></i> Django Admin
+        </a>
+        <a href="{% url 'home' %}" class="nav-link"><i class="bi bi-globe"></i> View Site</a>
+        <a href="{% url 'logout' %}" class="nav-link" style="color:var(--danger)!important;">
+          <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+      </nav>
+    </div>
+
+    <!-- ── Main ── -->
+    <div class="col py-4 px-4">
+
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 fw-bold mb-0">Admin Dashboard</h1>
+        <a href="{% url 'create_match' %}" class="btn btn-primary">
+          <i class="bi bi-plus-lg me-1"></i> New Match
+        </a>
+      </div>
+
+      <!-- Stat cards -->
+      <div class="row g-3 mb-5">
+        <div class="col-6 col-lg-3">
+          <div class="stat-card">
+            <div class="stat-num">{{ total_matches }}</div>
+            <div class="stat-label"><i class="bi bi-trophy me-1"></i>Total Matches</div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card">
+            <div class="stat-num text-warning">{{ total_bookings }}</div>
+            <div class="stat-label"><i class="bi bi-ticket-fill me-1"></i>Total Bookings</div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card">
+            <div class="stat-num" style="color:#34d399;">{{ total_users }}</div>
+            <div class="stat-label"><i class="bi bi-people-fill me-1"></i>Registered Users</div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="stat-card">
+            <div class="stat-num" style="color:#fbbf24;">${{ total_revenue|floatformat:2 }}</div>
+            <div class="stat-label"><i class="bi bi-currency-dollar me-1"></i>Total Revenue</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4">
+
+        <!-- Recent Matches -->
+        <div class="col-12 col-xl-7">
+          <div class="card">
+            <div class="card-header px-4 py-3 d-flex justify-content-between">
+              <h5 class="mb-0 fw-bold"><i class="bi bi-trophy me-2 text-warning"></i>Recent Matches</h5>
+              <a href="{% url 'create_match' %}" class="btn btn-primary btn-sm">+ Add</a>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Sport</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for match in recent_matches %}
+                    <tr>
+                      <td>
+                        <div class="fw-600" style="font-size:.9rem;">{{ match.title }}</div>
+                        <small style="color:var(--muted);">{{ match.home_team }} vs {{ match.away_team }}</small>
+                      </td>
+                      <td>
+                        <span class="sport-pill sport-{{ match.sport_type }}">
+                          {% if match.sport_type == 'football' %}⚽{% else %}🏀{% endif %}
+                        </span>
+                      </td>
+                      <td style="font-size:.83rem;white-space:nowrap;">{{ match.date|date:"d M Y" }}</td>
+                      <td>
+                        <span class="status-pill status-{{ match.status }}">
+                          {{ match.get_status_display }}
+                        </span>
+                      </td>
+                      <td class="text-end">
+                        <div class="d-flex gap-1 justify-content-end">
+                          <a href="{% url 'edit_match' match.pk %}" class="btn btn-warning btn-sm">
+                            <i class="bi bi-pencil-fill"></i>
+                          </a>
+                          <a href="{% url 'delete_match' match.pk %}" class="btn btn-danger btn-sm">
+                            <i class="bi bi-trash-fill"></i>
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                  {% empty %}
+                    <tr>
+                      <td colspan="5" class="text-center py-4" style="color:var(--muted);">
+                        No matches yet.
+                        <a href="{% url 'create_match' %}" style="color:#818cf8;">Create one →</a>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Bookings -->
+        <div class="col-12 col-xl-5">
+          <div class="card">
+            <div class="card-header px-4 py-3 d-flex justify-content-between">
+              <h5 class="mb-0 fw-bold">
+                <i class="bi bi-ticket-perforated-fill me-2" style="color:var(--accent);"></i>
+                Recent Bookings
+              </h5>
+              <a href="{% url 'all_bookings' %}" class="btn btn-outline-light btn-sm">View All</a>
+            </div>
+            <div class="p-3 d-flex flex-column gap-2">
+              {% for booking in recent_bookings %}
+                <div class="p-3 rounded-3 d-flex justify-content-between align-items-center"
+                     style="background:rgba(255,255,255,.03);border:1px solid var(--card-border);">
+                  <div>
+                    <div class="fw-600" style="font-size:.85rem;">{{ booking.user.username }}</div>
+                    <div style="color:var(--muted);font-size:.78rem;">{{ booking.match.title }}</div>
+                    <code style="color:#818cf8;font-size:.72rem;">{{ booking.booking_ref }}</code>
+                  </div>
+                  <div class="text-end">
+                    <div class="fw-bold" style="color:#fbbf24;">${{ booking.total_price }}</div>
+                    <span class="status-pill status-{{ booking.status }}" style="font-size:.68rem;">
+                      {{ booking.get_status_display }}
+                    </span>
+                  </div>
+                </div>
+              {% empty %}
+                <div class="text-center py-4" style="color:var(--muted);">No bookings yet.</div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /row -->
+    </div><!-- /col -->
+  </div><!-- /row -->
+</div>
+{% endblock %}

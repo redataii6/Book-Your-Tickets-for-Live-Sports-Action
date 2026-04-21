@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+{% block title %}Home – UniSports Tickets{% endblock %}
+
+{% block content %}
+
+<!-- ══ HERO ══ -->
+<section class="hero">
+  <div class="container text-center">
+    <p class="text-uppercase fw-700 mb-2" style="color:#818cf8;letter-spacing:.12em;font-size:.85rem;font-weight:700;">
+      <i class="bi bi-trophy-fill me-1 text-warning"></i> University Sports
+    </p>
+    <h1 class="mb-3">
+      Book Your Tickets for<br/>
+      <span>Live Sports Action</span>
+    </h1>
+    <p class="lead mb-4" style="color:var(--muted);max-width:540px;margin:0 auto;">
+      Football &amp; basketball matches, all in one place.
+      Reserve your seat before they sell out.
+    </p>
+    {% if not user.is_authenticated %}
+      <a href="{% url 'register' %}" class="btn btn-primary btn-lg me-2 px-4 py-2">
+        <i class="bi bi-person-plus me-1"></i> Get Started Free
+      </a>
+      <a href="#matches" class="btn btn-outline-light btn-lg px-4 py-2">
+        View Matches
+      </a>
+    {% else %}
+      <a href="#matches" class="btn btn-primary btn-lg px-4 py-2">
+        <i class="bi bi-search me-1"></i> Browse Matches
+      </a>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ══ SEARCH / FILTER BAR ══ -->
+<section class="py-4" style="background:var(--bg2);border-bottom:1px solid var(--card-border);">
+  <div class="container" id="matches">
+    <form method="get" action="{% url 'home' %}" class="row g-2 align-items-end">
+      <div class="col-12 col-md-6">
+        <label class="form-label"><i class="bi bi-search me-1"></i>Search</label>
+        <input type="text" name="q" class="form-control" placeholder="Team name, title, venue…"
+               value="{{ query }}">
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label"><i class="bi bi-funnel me-1"></i>Sport</label>
+        <select name="sport" class="form-select">
+          <option value="" {% if not sport_filter %}selected{% endif %}>All Sports</option>
+          <option value="football"   {% if sport_filter == 'football' %}selected{% endif %}>
+            ⚽ Football
+          </option>
+          <option value="basketball" {% if sport_filter == 'basketball' %}selected{% endif %}>
+            🏀 Basketball
+          </option>
+        </select>
+      </div>
+      <div class="col-6 col-md-3 d-flex gap-2">
+        <button class="btn btn-primary flex-grow-1" type="submit">Search</button>
+        {% if query or sport_filter %}
+          <a href="{% url 'home' %}" class="btn btn-outline-light">Clear</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- ══ MATCH CARDS ══ -->
+<section class="py-5">
+  <div class="container">
+
+    {% if query or sport_filter %}
+      <p class="mb-4" style="color:var(--muted);">
+        Showing <strong style="color:var(--text);">{{ total_matches }}</strong> result{{ total_matches|pluralize }}
+        {% if query %} for "<em>{{ query }}</em>"{% endif %}
+        {% if sport_filter %} &bull; {{ sport_filter|capfirst }}{% endif %}
+      </p>
+    {% endif %}
+
+    {% if page_obj.object_list %}
+      <div class="row g-4">
+        {% for match in page_obj %}
+          <div class="col-12 col-sm-6 col-lg-4 fade-up stagger-{{ forloop.counter }}">
+            <div class="card h-100">
+
+              <!-- Match image or placeholder -->
+              {% if match.image %}
+                <img src="{{ match.image.url }}" class="match-img" alt="{{ match.title }}">
+              {% else %}
+                <div class="match-img-placeholder">
+                  {% if match.sport_type == 'football' %}⚽{% else %}🏀{% endif %}
+                </div>
+              {% endif %}
+
+              <div class="card-body d-flex flex-column p-4">
+                <!-- Sport badge + availability -->
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="sport-pill sport-{{ match.sport_type }}">
+                    {% if match.sport_type == 'football' %}⚽{% else %}🏀{% endif %}
+                    {{ match.get_sport_type_display }}
+                  </span>
+                  {% if match.available_seats == 0 %}
+                    <span class="badge bg-danger">Sold Out</span>
+                  {% elif match.available_seats <= 10 %}
+                    <span class="badge bg-warning text-dark">Only {{ match.available_seats }} left</span>
+                  {% else %}
+                    <span class="badge" style="background:rgba(16,185,129,.2);color:#34d399;">
+                      {{ match.available_seats }} seats
+                    </span>
+                  {% endif %}
+                </div>
+
+                <!-- Title -->
+                <h5 class="fw-700 mb-1" style="font-weight:700;">{{ match.title }}</h5>
+                <!-- Teams -->
+                <p class="mb-3" style="color:var(--muted);font-size:.9rem;">
+                  <i class="bi bi-people-fill me-1"></i>
+                  {{ match.home_team }} <strong style="color:#818cf8;">vs</strong> {{ match.away_team }}
+                </p>
+
+                <!-- Date / Venue -->
+                <div class="mb-3 d-flex flex-column gap-1" style="font-size:.85rem;color:var(--muted);">
+                  <span><i class="bi bi-calendar-event me-1 text-primary"></i>
+                    {{ match.date|date:"D, d M Y" }} &bull; {{ match.time|time:"H:i" }}
+                  </span>
+                  <span><i class="bi bi-geo-alt-fill me-1 text-primary"></i>
+                    {{ match.location }}
+                  </span>
+                </div>
+
+                <!-- Price + CTA -->
+                <div class="mt-auto d-flex justify-content-between align-items-center">
+                  <span style="font-size:1.3rem;font-weight:800;color:#818cf8;">
+                    ${{ match.price }}
+                  </span>
+                  <a href="{% url 'match_detail' match.pk %}" class="btn btn-primary btn-sm px-3">
+                    View Details <i class="bi bi-arrow-right ms-1"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      {% if page_obj.has_other_pages %}
+        <nav class="mt-5 d-flex justify-content-center" aria-label="Match pages">
+          <ul class="pagination">
+            {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ query }}&sport={{ sport_filter }}">
+                  <i class="bi bi-chevron-left"></i>
+                </a>
+              </li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+              <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}&q={{ query }}&sport={{ sport_filter }}">{{ num }}</a>
+              </li>
+            {% endfor %}
+            {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ query }}&sport={{ sport_filter }}">
+                  <i class="bi bi-chevron-right"></i>
+                </a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% endif %}
+
+    {% else %}
+      <!-- Empty state -->
+      <div class="text-center py-5">
+        <div style="font-size:5rem;opacity:.3;">🏟️</div>
+        <h4 class="mt-3" style="color:var(--muted);">No matches found</h4>
+        <p style="color:var(--muted);">
+          {% if query or sport_filter %}
+            Try a different search or <a href="{% url 'home' %}" style="color:#818cf8;">clear filters</a>.
+          {% else %}
+            No matches are scheduled yet. Check back soon!
+          {% endif %}
+        </p>
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+
+<!-- ══ SPORT HIGHLIGHTS ══ -->
+<section class="py-5" style="background:var(--bg2);border-top:1px solid var(--card-border);">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-12 col-md-6">
+        <div class="card p-4 h-100" style="border-color:rgba(52,211,153,.2);">
+          <div style="font-size:3rem; line-height:1;">⚽</div>
+          <h4 class="fw-bold mt-3" style="color:#34d399;">Football / Soccer</h4>
+          <p style="color:var(--muted);">
+            Watch the best university football teams battle it out on the field.
+            Book your seats now and experience the excitement live!
+          </p>
+          <a href="{% url 'home' %}?sport=football" class="btn btn-sm btn-success mt-auto">
+            View Football Matches
+          </a>
+        </div>
+      </div>
+      <div class="col-12 col-md-6">
+        <div class="card p-4 h-100" style="border-color:rgba(251,191,36,.2);">
+          <div style="font-size:3rem; line-height:1;">🏀</div>
+          <h4 class="fw-bold mt-3" style="color:#fbbf24;">Basketball</h4>
+          <p style="color:var(--muted);">
+            Cheer for your favourite university basketball squad.
+            Fast-paced, thrilling, and always sold out – get your tickets early!
+          </p>
+          <a href="{% url 'home' %}?sport=basketball" class="btn btn-sm btn-warning mt-auto">
+            View Basketball Matches
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

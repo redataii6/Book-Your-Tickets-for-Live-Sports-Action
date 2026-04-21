@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} – UniSports Tickets{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width:760px;">
+
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb" style="background:none;padding:0;font-size:.85rem;">
+      <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}" style="color:#818cf8;">Admin</a></li>
+      <li class="breadcrumb-item active" style="color:var(--muted);">{{ title }}</li>
+    </ol>
+  </nav>
+
+  <div class="card p-4 p-md-5">
+    <h1 class="h4 fw-bold mb-4">
+      <i class="bi bi-{% if match %}pencil-fill{% else %}plus-circle-fill{% endif %} me-2"
+         style="color:var(--accent);"></i>
+      {{ title }}
+    </h1>
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+
+      <div class="row g-3">
+
+        <!-- Title -->
+        <div class="col-12">
+          <label class="form-label">Match Title *</label>
+          {{ form.title }}
+          {% if form.title.errors %}
+            <div class="text-danger small mt-1">{{ form.title.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Sport -->
+        <div class="col-12 col-md-6">
+          <label class="form-label">Sport Type *</label>
+          {{ form.sport_type }}
+        </div>
+
+        <!-- Teams -->
+        <div class="col-12 col-md-6">
+          <label class="form-label">Home Team *</label>
+          {{ form.home_team }}
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label">Away Team *</label>
+          {{ form.away_team }}
+        </div>
+
+        <!-- Date & Time -->
+        <div class="col-12 col-md-6">
+          <label class="form-label">Match Date *</label>
+          {{ form.date }}
+          {% if form.date.errors %}
+            <div class="text-danger small mt-1">{{ form.date.errors.0 }}</div>
+          {% endif %}
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label">Kickoff / Tip-off Time *</label>
+          {{ form.time }}
+        </div>
+
+        <!-- Location -->
+        <div class="col-12">
+          <label class="form-label">Venue / Location *</label>
+          {{ form.location }}
+        </div>
+
+        <!-- Stadium Coordinates (for map pin) -->
+        <div class="col-12">
+          <label class="form-label d-flex align-items-center gap-2">
+            📍 Stadium Coordinates
+            <span class="badge" style="background:rgba(79,70,229,.15);color:#818cf8;font-weight:500;font-size:.7rem;">
+              Used for the interactive map on the ticket
+            </span>
+          </label>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label small" style="color:var(--muted);">Latitude</label>
+          {{ form.latitude }}
+          {% if form.latitude.errors %}
+            <div class="text-danger small mt-1">{{ form.latitude.errors.0 }}</div>
+          {% endif %}
+          <div class="small mt-1" style="color:var(--muted);">e.g. 33.971590 (Stade Mohammed V, Casablanca)</div>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label small" style="color:var(--muted);">Longitude</label>
+          {{ form.longitude }}
+          {% if form.longitude.errors %}
+            <div class="text-danger small mt-1">{{ form.longitude.errors.0 }}</div>
+          {% endif %}
+          <div class="small mt-1" style="color:var(--muted);">e.g. -6.849813</div>
+        </div>
+
+        <!-- Price & Seats -->
+        <div class="col-12 col-md-6">
+          <label class="form-label">Ticket Price (USD) *</label>
+          {{ form.price }}
+          {% if form.price.errors %}
+            <div class="text-danger small mt-1">{{ form.price.errors.0 }}</div>
+          {% endif %}
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label">Total Seats *</label>
+          {{ form.total_seats }}
+          {% if form.total_seats.errors %}
+            <div class="text-danger small mt-1">{{ form.total_seats.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Description -->
+        <div class="col-12">
+          <label class="form-label">Description (optional)</label>
+          {{ form.description }}
+        </div>
+
+        <!-- Image -->
+        <div class="col-12">
+          <label class="form-label">Match Image (optional)</label>
+          {{ form.image }}
+          <div class="small mt-1" style="color:var(--muted);">
+            Upload a banner image for this match (JPG/PNG recommended).
+          </div>
+          {% if match and match.image %}
+            <div class="mt-2">
+              <img src="{{ match.image.url }}" alt="Current image"
+                   class="rounded-3" style="max-height:120px;">
+            </div>
+          {% endif %}
+        </div>
+
+      </div><!-- /row -->
+
+      <!-- Info box -->
+      <div class="mt-4 p-3 rounded-3"
+           style="background:rgba(79,70,229,.08);border:1px solid rgba(79,70,229,.2);font-size:.83rem;color:var(--muted);">
+        <i class="bi bi-info-circle me-1" style="color:#818cf8;"></i>
+        After creating, staff managers will be notified to review and publish the match.
+        The match will remain <strong>Pending</strong> until a staff member approves it.
+      </div>
+
+      <div class="d-flex gap-3 mt-4">
+        <button type="submit" class="btn btn-primary px-4 py-2">
+          <i class="bi bi-save me-1"></i>
+          {% if match %}Save Changes{% else %}Create Match{% endif %}
+        </button>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-light">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

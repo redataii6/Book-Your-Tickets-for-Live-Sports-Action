@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}All Bookings – UniSports Tickets{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+
+    <!-- Sidebar -->
+    <div class="col-auto sidebar" style="width:240px;">
+      <div class="text-center mb-4 pt-2">
+        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2"
+             style="width:48px;height:48px;background:linear-gradient(135deg,#ef4444,#b91c1c);font-size:1.2rem;font-weight:800;">
+          {{ user.username|first|upper }}
+        </div>
+        <div class="fw-bold" style="font-size:.9rem;">{{ user.username }}</div>
+        <span class="status-pill status-cancelled">Administrator</span>
+      </div>
+      <nav class="nav flex-column">
+        <a href="{% url 'admin_dashboard' %}" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="{% url 'create_match' %}"    class="nav-link"><i class="bi bi-plus-circle-fill"></i> Create Match</a>
+        <a href="{% url 'manage_users' %}"    class="nav-link"><i class="bi bi-people-fill"></i> Manage Users</a>
+        <a href="{% url 'all_bookings' %}"    class="nav-link active"><i class="bi bi-ticket-perforated-fill"></i> All Bookings</a>
+        <hr style="border-color:var(--card-border);">
+        <a href="/admin/" class="nav-link" target="_blank"><i class="bi bi-gear-fill"></i> Django Admin</a>
+        <a href="{% url 'home' %}" class="nav-link"><i class="bi bi-globe"></i> View Site</a>
+        <a href="{% url 'logout' %}" class="nav-link" style="color:var(--danger)!important;"><i class="bi bi-box-arrow-right"></i> Logout</a>
+      </nav>
+    </div>
+
+    <!-- Main -->
+    <div class="col py-4 px-4">
+      <h1 class="h3 fw-bold mb-4">
+        <i class="bi bi-ticket-perforated-fill me-2" style="color:var(--accent);"></i>All Bookings
+      </h1>
+
+      <div class="card">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>Ref</th>
+                <th>User</th>
+                <th>Match</th>
+                <th>Sport</th>
+                <th>Qty</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Booked At</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for booking in bookings %}
+                <tr>
+                  <td><code style="color:#818cf8;font-size:.78rem;">{{ booking.booking_ref }}</code></td>
+                  <td>
+                    <div class="fw-600" style="font-size:.88rem;">{{ booking.user.username }}</div>
+                    <small style="color:var(--muted);">{{ booking.user.email|default:"—" }}</small>
+                  </td>
+                  <td>
+                    <div style="font-size:.88rem;">{{ booking.match.title }}</div>
+                    <small style="color:var(--muted);">{{ booking.match.date|date:"d M Y" }}</small>
+                  </td>
+                  <td>
+                    <span class="sport-pill sport-{{ booking.match.sport_type }}">
+                      {% if booking.match.sport_type == 'football' %}⚽{% else %}🏀{% endif %}
+                    </span>
+                  </td>
+                  <td class="fw-bold">{{ booking.quantity }}</td>
+                  <td class="fw-bold" style="color:#fbbf24;">${{ booking.total_price }}</td>
+                  <td>
+                    <span class="status-pill status-{{ booking.status }}">
+                      {{ booking.get_status_display }}
+                    </span>
+                  </td>
+                  <td style="font-size:.78rem;color:var(--muted);white-space:nowrap;">
+                    {{ booking.booked_at|date:"d M Y, H:i" }}
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="8" class="text-center py-4" style="color:var(--muted);">
+                    No bookings yet.
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /col -->
+  </div><!-- /row -->
+</div>
+{% endblock %}
