@@ -152,8 +152,17 @@
   }
   .info-item .value.accent { color: #818cf8; }
 
-  /* ── Right: QR ── */
+  /* ── Right: QR React widget ── */
   .ticket-qr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .6rem;
+    min-width: 200px;
+  }
+
+  /* ── React QR widget styles ── */
+  #qr-widget {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -165,19 +174,94 @@
     padding: 14px;
     box-shadow: 0 4px 20px rgba(0,0,0,.25);
     display: inline-flex;
+    position: relative;
   }
-  .qr-frame img {
+  .qr-img {
     width: 160px;
     height: 160px;
     image-rendering: pixelated;
     display: block;
     border-radius: 4px;
+    transition: opacity 0.4s ease;
+  }
+  .qr-img.fading { opacity: 0; }
+
+  /* Spinner overlay */
+  .qr-spinner-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.7);
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .qr-spinner {
+    width: 36px; height: 36px;
+    border: 4px solid #e0e7ff;
+    border-top-color: #4f46e5;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Countdown ring */
+  .qr-countdown-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .3rem;
+  }
+  .qr-countdown-svg {
+    transform: rotate(-90deg);
+  }
+  .qr-ring-bg {
+    fill: none;
+    stroke: rgba(129,140,248,.2);
+    stroke-width: 4;
+  }
+  .qr-ring-progress {
+    fill: none;
+    stroke: #818cf8;
+    stroke-width: 4;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s linear;
+  }
+  .qr-countdown-text {
+    font-size: .72rem;
+    color: var(--muted);
+    text-align: center;
+    max-width: 180px;
   }
   .qr-label {
     font-size: .72rem;
     color: var(--muted);
     text-align: center;
     max-width: 180px;
+  }
+  .qr-live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    font-size: .65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #10b981;
+    padding: .15rem .5rem;
+    border-radius: 50px;
+    border: 1px solid rgba(16,185,129,.4);
+    background: rgba(16,185,129,.1);
+  }
+  .qr-live-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #10b981;
+    animation: pulse-dot 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: .4; transform: scale(.7); }
   }
 
   /* ── Map section ── */
@@ -199,7 +283,14 @@
     height: 340px;
     border-radius: 1rem;
     border: 1px solid var(--card-border);
-    z-index: 0;
+    overflow: hidden;
+    display: block;
+  }
+  #stadium-map iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
   }
   .map-no-coords {
     height: 120px;
@@ -316,20 +407,23 @@
         </div>
       </div>
 
-      <!-- Right: QR Code -->
+      <!-- Right: React QR Widget mount point -->
       <div class="ticket-qr">
-        {% if booking.qr_code %}
+        <div id="qr-widget">
+          <!-- React will render here -->
           <div class="qr-frame">
-            <img src="{{ booking.qr_code.url }}" alt="Ticket QR Code for {{ booking.booking_ref }}">
+            {% if booking.qr_code %}
+              <img class="qr-img" src="{{ booking.qr_code.url }}" alt="Loading QR…">
+            {% else %}
+              <div style="width:160px;height:160px;display:flex;align-items:center;justify-content:center;color:#999;font-size:.8rem;">
+                Generating…
+              </div>
+            {% endif %}
           </div>
           <div class="qr-label">
-            <i class="bi bi-shield-check me-1" style="color:#10b981;"></i>
-            Scan at stadium gate<br>
-            <span style="font-family:monospace;font-size:.68rem;color:#818cf8;">{{ booking.booking_ref }}</span>
+            <i class="bi bi-hourglass-split me-1"></i>Loading live QR…
           </div>
-        {% else %}
-          <div class="qr-label" style="color:var(--muted);">QR code generating…</div>
-        {% endif %}
+        </div>
       </div>
 
     </div><!-- /ticket-body -->
@@ -342,101 +436,29 @@
       </h3>
 
       {% if booking.match.latitude and booking.match.longitude %}
-        <!-- Leaflet.js map – no API key needed -->
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-              integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-        <div id="stadium-map" aria-label="Stadium location map"></div>
-        <!-- Open in Google Maps link -->
+        <!-- Google Maps iframe embed – free, no API key needed -->
+        <div id="stadium-map" aria-label="Stadium location map">
+          <iframe
+            src="https://maps.google.com/maps?q={{ booking.match.latitude }},{{ booking.match.longitude }}&t=&z=15&ie=UTF8&iwloc=&output=embed"
+            loading="lazy"
+            allowfullscreen
+            referrerpolicy="no-referrer-when-downgrade"
+            title="Stadium location: {{ booking.match.location|escapejs }}"
+          ></iframe>
+        </div>
+        <!-- Footer row: coordinates + open in Google Maps -->
         <div class="mt-2 d-flex align-items-center justify-content-between flex-wrap gap-2">
           <small style="color:var(--muted);font-size:.72rem;">
             <i class="bi bi-geo-alt me-1"></i>{{ booking.match.location }}
             &nbsp;·&nbsp;{{ booking.match.latitude }}, {{ booking.match.longitude }}
           </small>
-          {% if booking.match.latitude == 33.5825272 and booking.match.longitude == -7.6470165 %}
-            {# Exact direct link for Mohammed V Stadium, Casablanca #}
-            <a href="https://www.google.com/maps/place/Mohammed+V+Stadium/@33.5828909,-7.649021,570m/data=!3m1!1e3!4m15!1m8!3m7!1s0xda7cd6323aed1e1:0x778d1acefe1d1296!2sBd+Mohammed+V,+Casablanca+20250!3b1!8m2!3d33.5937226!4d-7.6078823!16s%2Fg%2F1pznmjykn!3m5!1s0xda7d2e77f3d8aaf:0x9169b10a83e53ab!8m2!3d33.5825272!4d-7.6470165!16zL20vMDZmNzgy"
-               target="_blank" rel="noopener"
-               class="btn btn-sm"
-               style="background:#1a73e8;color:#fff;font-size:.78rem;border:none;">
-              <i class="bi bi-box-arrow-up-right me-1"></i>Open Mohammed V Stadium in Google Maps
-            </a>
-          {% else %}
-            {# Generic coordinates link for other stadiums #}
-            <a href="https://www.google.com/maps/search/?api=1&query={{ booking.match.latitude }},{{ booking.match.longitude }}"
-               target="_blank" rel="noopener"
-               class="btn btn-sm"
-               style="background:#1a73e8;color:#fff;font-size:.78rem;border:none;">
-              <i class="bi bi-box-arrow-up-right me-1"></i>Open in Google Maps
-            </a>
-          {% endif %}
+          <a href="https://www.google.com/maps/search/?api=1&query={{ booking.match.latitude }},{{ booking.match.longitude }}"
+             target="_blank" rel="noopener"
+             class="btn btn-sm"
+             style="background:#1a73e8;color:#fff;font-size:.78rem;border:none;">
+            <i class="bi bi-box-arrow-up-right me-1"></i>Open in Google Maps
+          </a>
         </div>
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-                integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN/WLaA=" crossorigin=""></script>
-        <script>
-          document.addEventListener('DOMContentLoaded', function () {
-            var lat = {{ booking.match.latitude }};
-            var lng = {{ booking.match.longitude }};
-            var venueName = "{{ booking.match.location|escapejs }}";
-            var matchTitle = "{{ booking.match.title|escapejs }}";
-
-            var map = L.map('stadium-map', {
-              center: [lat, lng],
-              zoom: 15,
-              scrollWheelZoom: false,
-            });
-
-            /* OpenStreetMap tile layer – completely free */
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-              maxZoom: 19,
-              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
-
-            /* Custom pulsing marker icon */
-            var stadiumIcon = L.divIcon({
-              className: '',
-              html: `<div style="
-                position:relative;
-                width:44px;height:44px;
-              ">
-                <div style="
-                  position:absolute;inset:0;
-                  border-radius:50%;
-                  background:rgba(99,102,241,.3);
-                  animation:pulse-ring 1.8s ease-out infinite;
-                "></div>
-                <div style="
-                  position:absolute;top:50%;left:50%;
-                  transform:translate(-50%,-50%);
-                  width:26px;height:26px;
-                  border-radius:50%;
-                  background:#6366f1;
-                  border:3px solid #fff;
-                  box-shadow:0 2px 12px rgba(99,102,241,.6);
-                  display:flex;align-items:center;justify-content:center;
-                  font-size:14px;
-                ">🏟️</div>
-              </div>`,
-              iconSize: [44, 44],
-              iconAnchor: [22, 22],
-              popupAnchor: [0, -24],
-            });
-
-            var marker = L.marker([lat, lng], { icon: stadiumIcon }).addTo(map);
-            marker.bindPopup(
-              `<div style="font-family:system-ui;min-width:170px;">
-                <strong style="color:#4f46e5;">${venueName}</strong><br>
-                <span style="font-size:.8rem;color:#666;">${matchTitle}</span>
-              </div>`,
-              { maxWidth: 220 }
-            ).openPopup();
-          });
-        </script>
-        <style>
-          @keyframes pulse-ring {
-            0%   { transform: scale(0.6); opacity: .9; }
-            100% { transform: scale(1.8); opacity: 0; }
-          }
-        </style>
       {% else %}
         <div class="map-no-coords">
           <i class="bi bi-geo-alt" style="font-size:1.3rem;"></i>
@@ -466,5 +488,169 @@
 
   </div><!-- /ticket-card -->
 </div><!-- /ticket-wrapper -->
+
+<!-- ══════════════════════════════════════════════════════════
+     REACT QR WIDGET  — loaded via CDN, no build step needed
+     ══════════════════════════════════════════════════════════ -->
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+<script>
+(function () {
+  'use strict';
+
+  // ── Config (injected by Django template) ─────────────────
+  const BOOKING_ID   = {{ booking.pk }};
+  const API_URL      = "{% url 'qr_refresh_api' booking.pk %}";
+  const INITIAL_URL  = "{% if booking.qr_code %}{{ booking.qr_code.url }}{% endif %}";
+  const BOOKING_REF  = "{{ booking.booking_ref }}";
+  const REFRESH_MS   = 60000;   // 60 seconds
+  const RING_R       = 28;      // SVG ring radius
+  const RING_CIRC    = 2 * Math.PI * RING_R;
+
+  const { useState, useEffect, useRef, useCallback } = React;
+
+  // ── Utility: compute seconds-left until the next minute boundary ──
+  function secondsUntilNextMinute() {
+    const now = new Date();
+    return 60 - now.getSeconds();
+  }
+
+  // ── QRWidget component ────────────────────────────────────
+  function QRWidget() {
+    const [qrUrl,     setQrUrl]     = useState(INITIAL_URL);
+    const [loading,   setLoading]   = useState(false);
+    const [error,     setError]     = useState(null);
+    const [fading,    setFading]    = useState(false);
+    const [countdown, setCountdown] = useState(secondsUntilNextMinute());
+
+    const timerRef    = useRef(null);
+    const intervalRef = useRef(null);
+
+    // ── Fetch a fresh QR from the Django API ─────────────────
+    const fetchQR = useCallback(async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const resp = await fetch(API_URL, { credentials: 'same-origin' });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const data = await resp.json();
+
+        // Fade out → swap src → fade in
+        setFading(true);
+        await new Promise(r => setTimeout(r, 400));
+        setQrUrl(data.qr_url + '?t=' + Date.now()); // cache-bust
+        setFading(false);
+
+        // Sync countdown to actual server expiry
+        setCountdown(Math.min(data.seconds_left, 60));
+      } catch (e) {
+        setError('Could not refresh QR. Retrying soon…');
+      } finally {
+        setLoading(false);
+      }
+    }, []);
+
+    // ── On mount: fetch immediately, then every 60 s ─────────
+    useEffect(() => {
+      fetchQR();
+
+      timerRef.current = setInterval(fetchQR, REFRESH_MS);
+      return () => clearInterval(timerRef.current);
+    }, [fetchQR]);
+
+    // ── Countdown ticker: counts down from 60 every second ───
+    useEffect(() => {
+      intervalRef.current = setInterval(() => {
+        setCountdown(prev => {
+          if (prev <= 1) return 60;   // reset; fetchQR will fire from its own interval
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(intervalRef.current);
+    }, []);
+
+    // ── SVG ring stroke offset ────────────────────────────────
+    const dashOffset = RING_CIRC * (1 - countdown / 60);
+
+    return React.createElement(
+      'div', { id: 'qr-widget-inner', style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.6rem' } },
+
+      // QR image frame
+      React.createElement('div', { className: 'qr-frame' },
+        React.createElement('img', {
+          className: `qr-img${fading ? ' fading' : ''}`,
+          src:       qrUrl || '',
+          alt:       `QR code for ticket ${BOOKING_REF}`,
+          id:        'qr-live-img',
+        }),
+        loading && React.createElement('div', { className: 'qr-spinner-overlay' },
+          React.createElement('div', { className: 'qr-spinner' })
+        )
+      ),
+
+      // Live badge
+      React.createElement('div', { className: 'qr-live-badge' },
+        React.createElement('div', { className: 'qr-live-dot' }),
+        'Live QR'
+      ),
+
+      // Countdown ring + text
+      React.createElement('div', { className: 'qr-countdown-wrap' },
+        React.createElement('svg', {
+          className: 'qr-countdown-svg',
+          width: 70, height: 70,
+          viewBox: '0 0 70 70',
+          'aria-label': `Refreshes in ${countdown} seconds`,
+        },
+          React.createElement('circle', { className: 'qr-ring-bg',       cx: 35, cy: 35, r: RING_R }),
+          React.createElement('circle', {
+            className: 'qr-ring-progress',
+            cx: 35, cy: 35, r: RING_R,
+            strokeDasharray:  RING_CIRC,
+            strokeDashoffset: dashOffset,
+          }),
+          React.createElement('text', {
+            x: 35, y: 35,
+            dominantBaseline: 'middle',
+            textAnchor: 'middle',
+            style: {
+              fill: 'var(--text, #e2e8f0)',
+              fontSize: '14px',
+              fontWeight: '700',
+              transform: 'rotate(90deg)',
+              transformOrigin: '35px 35px',
+            },
+          }, `${countdown}s`)
+        ),
+        React.createElement('div', { className: 'qr-countdown-text' },
+          React.createElement('i', { className: 'bi bi-arrow-clockwise me-1', style: { color: '#818cf8' } }),
+          'Refreshes in ', React.createElement('strong', null, `${countdown}s`)
+        )
+      ),
+
+      // Booking ref label
+      React.createElement('div', { className: 'qr-label' },
+        React.createElement('i', { className: 'bi bi-shield-check me-1', style: { color: '#10b981' } }),
+        'Scan at stadium gate',
+        React.createElement('br'),
+        React.createElement('span', { style: { fontFamily: 'monospace', fontSize: '.68rem', color: '#818cf8' } }, BOOKING_REF)
+      ),
+
+      // Error banner
+      error && React.createElement('div', {
+        style: { color: '#fca5a5', fontSize: '.72rem', textAlign: 'center', maxWidth: '180px' }
+      }, error)
+    );
+  }
+
+  // ── Mount the widget ──────────────────────────────────────
+  const container = document.getElementById('qr-widget');
+  if (container) {
+    const root = ReactDOM.createRoot(container);
+    root.render(React.createElement(QRWidget));
+  }
+})();
+</script>
 
 {% endblock %}

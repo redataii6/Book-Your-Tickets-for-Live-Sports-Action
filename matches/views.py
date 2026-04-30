@@ -17,12 +17,16 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q, Sum
 from django.utils import timezone
-from django.http import HttpResponseForbidden
+from django.conf import settings
+from django.http import HttpResponseForbidden, JsonResponse
 from django.core.files.base import ContentFile
+from django.views.decorators.http import require_GET
 
 import qrcode
 import qrcode.image.pil
 from io import BytesIO
+import hashlib
+import math
 
 from .models import Match, Booking, Notification, UserProfile
 from .forms  import RegisterForm, LoginForm, MatchForm, BookingForm, ProfileForm
@@ -71,6 +75,66 @@ def generate_qr_for_booking(booking):
 
     filename = f"qr_{booking.booking_ref}.png"
     booking.qr_code.save(filename, ContentFile(buffer.read()), save=True)
+
+
+def _minute_token(booking_ref):
+    """
+    Build a short, deterministic token that changes every 60 seconds.
+    Formula: SHA-256( booking_ref + current_UTC_minute_bucket )[:8]
+    Same inputs within the same minute → same token (idempotent).
+    """
+    now_utc   = timezone.now()
+    # Bucket: integer number of minutes since Unix epoch
+    bucket    = math.floor(now_utc.timestamp() / 60)
+    raw       = f"{booking_ref}:{bucket}"
+    return hashlib.sha256(raw.encode()).hexdigest()[:8]
+
+
+def generate_timed_qr_for_booking(booking):
+    """
+    Generate a time-sensitive QR code PNG.
+    The embedded payload includes a per-minute token so each 60-second window
+    produces a distinct QR.  The file is written to media/qr_codes/ and the
+    path is returned (but the booking.qr_code field is NOT updated — callers
+    can use the returned URL directly for live-refresh without mutating the DB).
+
+    Returns the *relative media path* string, e.g. 'qr_codes/qr_TKT-1_ab12cd34.png'.
+    """
+    token    = _minute_token(booking.booking_ref)
+    now_utc  = timezone.now()
+    expires  = now_utc + timezone.timedelta(seconds=60)
+
+    qr_data = (
+        f"UNISPORTS|REF:{booking.booking_ref}"
+        f"|MATCH:{booking.match.title}"
+        f"|USER:{booking.user.username}"
+        f"|QTY:{booking.quantity}"
+        f"|PRICE:{booking.total_price}"
+        f"|TOKEN:{token}"
+        f"|EXPIRES:{expires.strftime('%Y%m%dT%H%M%SZ')}"
+    )
+
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(qr_data)
+    qr.make(fit=True)
+
+    img    = qr.make_image(fill_color="black", back_color="white")
+    buffer = BytesIO()
+    img.save(buffer, format='PNG')
+    buffer.seek(0)
+
+    # Save to the same media/qr_codes/ directory, file name includes the token
+    from django.core.files.storage import default_storage
+    relative_path = f"qr_codes/qr_{booking.booking_ref}_{token}.png"
+    if not default_storage.exists(relative_path):
+        default_storage.save(relative_path, ContentFile(buffer.read()))
+
+    return relative_path, expires
 
 
 def is_admin(user):
@@ -607,3 +671,42 @@ def all_bookings_view(request):
     """Admin views all bookings in the system."""
     bookings = Booking.objects.all().select_related('user', 'match').order_by('-booked_at')
     return render(request, 'admin_panel/all_bookings.html', {'bookings': bookings})
+
+
+# ════════════════════════════════════════════
+# API: QR CODE REFRESH  (used by React widget)
+# ════════════════════════════════════════════
+
+@login_required
+@require_GET
+def qr_refresh_api(request, pk):
+    """
+    JSON endpoint polled by the React QR widget every 60 seconds.
+
+    GET /api/ticket/<pk>/qr/
+
+    Response:
+      {
+        "qr_url":      "/media/qr_codes/qr_TKT-1-..._ab12cd34.png",
+        "expires_at":  "2026-04-29T10:05:00Z",   // ISO-8601 UTC
+        "seconds_left": 42                         // seconds until next rotation
+      }
+
+    Security: the booking must belong to the logged-in user.
+    """
+    booking = get_object_or_404(Booking, pk=pk, user=request.user)
+
+    relative_path, expires = generate_timed_qr_for_booking(booking)
+
+    # Build the full media URL from the relative path
+    qr_url = request.build_absolute_uri(f"{settings.MEDIA_URL}{relative_path}")
+
+    now_utc      = timezone.now()
+    seconds_left = max(0, int((expires - now_utc).total_seconds()))
+
+    return JsonResponse({
+        "qr_url":      qr_url,
+        "expires_at":  expires.strftime('%Y-%m-%dT%H:%M:%SZ'),
+        "seconds_left": seconds_left,
+    })
+

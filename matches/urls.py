@@ -46,6 +46,9 @@ urlpatterns = [
     path('notifications/',       views.notifications_view, name='notifications'),
     path('profile/',             views.profile_view,       name='profile'),
 
+    # ── API ─────────────────────────────────────────
+    path('api/ticket/<int:pk>/qr/', views.qr_refresh_api, name='qr_refresh_api'),
+
     # ── STAFF ───────────────────────────────────────
     path('staff/dashboard/',              views.staff_dashboard_view, name='staff_dashboard'),
     path('staff/match/<int:pk>/publish/', views.publish_match_view,   name='publish_match'),
