@@ -23,12 +23,34 @@ class UserProfileAdmin(admin.ModelAdmin):
 # ─────────────────────────────────────────────
 @admin.register(Match)
 class MatchAdmin(admin.ModelAdmin):
-    list_display  = ('title', 'sport_type', 'home_team', 'away_team',
-                     'date', 'time', 'status', 'available_seats', 'price')
-    list_filter   = ('status', 'sport_type', 'date')
-    search_fields = ('title', 'home_team', 'away_team', 'location')
-    readonly_fields = ('created_at', 'updated_at', 'available_seats')
+    list_display    = ('title', 'sport_type', 'home_team', 'away_team',
+                       'city', 'country', 'date', 'time', 'status', 'available_seats', 'price')
+    list_filter     = ('status', 'sport_type', 'country', 'date')
+    search_fields   = ('title', 'home_team', 'away_team', 'city', 'country', 'location')
+    readonly_fields = ('location', 'created_at', 'updated_at')
     date_hierarchy  = 'date'
+    fieldsets = (
+        ('Match Info', {
+            'fields': ('title', 'sport_type', 'home_team', 'away_team', 'status', 'created_by')
+        }),
+        ('Schedule', {
+            'fields': ('date', 'time')
+        }),
+        ('Location', {
+            'description': 'Enter City and Country separately. The Location field is auto-generated.',
+            'fields': ('city', 'country', 'location', 'latitude', 'longitude'),
+        }),
+        ('Tickets & Pricing', {
+            'fields': ('price', 'total_seats', 'available_seats')
+        }),
+        ('Media & Details', {
+            'fields': ('description', 'image')
+        }),
+        ('Timestamps', {
+            'classes': ('collapse',),
+            'fields': ('created_at', 'updated_at'),
+        }),
+    )
 
 
 # ─────────────────────────────────────────────

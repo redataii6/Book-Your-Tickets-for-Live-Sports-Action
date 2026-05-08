@@ -35,9 +35,13 @@ class UserProfile(models.Model):
         on_delete=models.CASCADE,
         related_name='profile'
     )
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='client')
-    phone = models.CharField(max_length=20, blank=True, null=True)
-    bio   = models.TextField(blank=True, null=True)
+    role     = models.CharField(max_length=10, choices=ROLE_CHOICES, default='client')
+    phone    = models.CharField(max_length=20, blank=True, null=True)
+    bio      = models.TextField(blank=True, null=True)
+    location = models.CharField(
+        max_length=100, blank=True, default='',
+        help_text='User country/city used for match recommendations (e.g. Morocco)'
+    )
 
     def __str__(self):
         return f"{self.user.username} ({self.role})"
@@ -71,37 +75,64 @@ class Match(models.Model):
         ('cancelled', 'Cancelled'),
     ]
 
-    title          = models.CharField(max_length=200)
-    sport_type     = models.CharField(max_length=20, choices=SPORT_CHOICES)
-    home_team      = models.CharField(max_length=100)
-    away_team      = models.CharField(max_length=100)
-    date           = models.DateField()
-    time           = models.TimeField()
-    location       = models.CharField(max_length=200)
-    latitude       = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True,
-                        help_text='Stadium latitude (e.g. 33.9716)')
-    longitude      = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True,
-                        help_text='Stadium longitude (e.g. -6.8498)')
-    description    = models.TextField(blank=True)
-    price          = models.DecimalField(max_digits=8, decimal_places=2)
-    total_seats    = models.PositiveIntegerField()
-    available_seats= models.PositiveIntegerField()
-    status         = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
-    image          = models.ImageField(upload_to='match_images/', blank=True, null=True)
-    created_by     = models.ForeignKey(
+    title           = models.CharField(max_length=200)
+    sport_type      = models.CharField(max_length=20, choices=SPORT_CHOICES)
+    home_team       = models.CharField(max_length=100)
+    away_team       = models.CharField(max_length=100)
+    date            = models.DateField()
+    time            = models.TimeField()
+    # ── Location fields ──
+    city            = models.CharField(
+        max_length=100, blank=True, default='',
+        help_text='City / venue city (e.g. Casablanca)'
+    )
+    country         = models.CharField(
+        max_length=100, blank=True, default='',
+        help_text='Country (e.g. Morocco, France, USA)'
+    )
+    location        = models.CharField(
+        max_length=200,
+        help_text='Auto-filled from city + country. You can also type a free-form venue name.'
+    )
+    latitude        = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True,
+                         help_text='Stadium latitude (e.g. 33.9716)')
+    longitude       = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True,
+                         help_text='Stadium longitude (e.g. -6.8498)')
+    description     = models.TextField(blank=True)
+    price           = models.DecimalField(max_digits=8, decimal_places=2)
+    total_seats     = models.PositiveIntegerField()
+    available_seats = models.PositiveIntegerField()
+    status          = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    image           = models.ImageField(upload_to='match_images/', blank=True, null=True)
+    created_by      = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
         null=True,
         related_name='created_matches'
     )
-    created_at     = models.DateTimeField(auto_now_add=True)
-    updated_at     = models.DateTimeField(auto_now=True)
+    created_at      = models.DateTimeField(auto_now_add=True)
+    updated_at      = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['date', 'time']
 
+    def save(self, *args, **kwargs):
+        """Auto-populate location from city + country if not set manually."""
+        parts = [p.strip() for p in [self.city, self.country] if p and p.strip()]
+        if parts:
+            self.location = ', '.join(parts)
+        elif not self.location:
+            self.location = '—'
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.title} ({self.date})"
+
+    @property
+    def full_location(self):
+        """Returns 'City, Country' or just whichever is set."""
+        parts = [p.strip() for p in [self.city, self.country] if p and p.strip()]
+        return ', '.join(parts) if parts else self.location
 
     def is_available(self):
         """Returns True if tickets are still available."""

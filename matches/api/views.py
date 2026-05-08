@@ -15,6 +15,7 @@ View groups:
 
 import hashlib
 import math
+import re
 
 import qrcode
 from io import BytesIO
@@ -224,6 +225,53 @@ class MatchDetailView(generics.RetrieveAPIView):
     queryset           = Match.objects.filter(status='published')
 
 
+class MatchRecommendationView(generics.ListAPIView):
+    """GET /api/matches/recommendations/
+
+    1. Splits the user's profile location by common separators (-, ,, /)
+       to extract individual tokens (e.g. 'Morocco - Casablanca' → ['Morocco', 'Casablanca']).
+    2. Filters published matches where ANY token matches country OR city (case-insensitive).
+    3. Falls back to the 6 soonest published matches globally if nothing matches.
+    Requires authentication.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class   = MatchListSerializer
+    pagination_class   = None
+
+    def get_queryset(self):
+        profile = get_or_create_profile(self.request.user)
+        user_loc = (profile.location or '').strip()
+
+        published = Match.objects.filter(status='published').order_by('date')
+
+        if user_loc:
+            # Split on -, ,, / to get individual tokens
+            # e.g. "Morocco - Casablanca" → ["Morocco", "Casablanca"]
+            # e.g. "France, Paris"        → ["France", "Paris"]
+            # e.g. "Morocco"              → ["Morocco"]
+            tokens = [t.strip() for t in re.split(r'[-,/|]+', user_loc) if t.strip()]
+
+            if tokens:
+                # Build OR filter: each token may match:
+                #   - country  (structured field, exact)
+                #   - city     (structured field, exact)
+                #   - location (legacy free-text field, contains) ← fixes existing matches
+                q = Q()
+                for token in tokens:
+                    q |= (
+                        Q(country__iexact=token)    |
+                        Q(city__iexact=token)        |
+                        Q(location__icontains=token)
+                    )
+
+                by_location = published.filter(q)
+                if by_location.exists():
+                    return by_location[:6]
+
+        # Fallback: 6 soonest published matches globally
+        return published[:6]
+
+
 # ════════════════════════════════════════════
 # BOOKING VIEWS — CLIENT
 # ════════════════════════════════════════════
@@ -357,6 +405,7 @@ class ProfileView(APIView):
             'role':       profile.role,
             'phone':      profile.phone or '',
             'bio':        profile.bio   or '',
+            'location':   profile.location or '',
         }
         return Response(data)
 

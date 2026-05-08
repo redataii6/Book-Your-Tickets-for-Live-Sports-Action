@@ -19,13 +19,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     """Read-only user representation (includes role via profile)."""
-    role  = serializers.CharField(source='profile.role',  read_only=True, default='client')
-    phone = serializers.CharField(source='profile.phone', read_only=True, default='')
-    bio   = serializers.CharField(source='profile.bio',   read_only=True, default='')
+    role     = serializers.CharField(source='profile.role',     read_only=True, default='client')
+    phone    = serializers.CharField(source='profile.phone',    read_only=True, default='')
+    bio      = serializers.CharField(source='profile.bio',      read_only=True, default='')
+    location = serializers.CharField(source='profile.location', read_only=True, default='')
 
     class Meta:
         model  = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'role', 'phone', 'bio']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'role', 'phone', 'bio', 'location']
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -63,7 +64,7 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model  = UserProfile
-        fields = ['first_name', 'last_name', 'email', 'phone', 'bio']
+        fields = ['first_name', 'last_name', 'email', 'phone', 'bio', 'location']
 
     def update(self, instance, validated_data):
         user_data = validated_data.pop('user', {})
@@ -87,13 +88,15 @@ class MatchListSerializer(serializers.ModelSerializer):
     sport_display = serializers.CharField(source='get_sport_type_display', read_only=True)
     is_available  = serializers.BooleanField(read_only=True)
     image_url     = serializers.SerializerMethodField()
+    full_location = serializers.CharField(read_only=True)
 
     class Meta:
         model  = Match
         fields = [
             'id', 'title', 'sport_type', 'sport_display',
             'home_team', 'away_team', 'date', 'time',
-            'location', 'price', 'total_seats', 'available_seats',
+            'city', 'country', 'location', 'full_location',
+            'price', 'total_seats', 'available_seats',
             'status', 'image_url', 'is_available',
         ]
 
@@ -118,7 +121,8 @@ class MatchWriteSerializer(serializers.ModelSerializer):
         model  = Match
         fields = [
             'title', 'sport_type', 'home_team', 'away_team',
-            'date', 'time', 'location', 'latitude', 'longitude',
+            'date', 'time', 'city', 'country', 'location',
+            'latitude', 'longitude',
             'description', 'price', 'total_seats', 'available_seats',
             'status', 'image',
         ]

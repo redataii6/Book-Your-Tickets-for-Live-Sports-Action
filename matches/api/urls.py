@@ -9,7 +9,7 @@ from .views import (
     # Auth
     RegisterView, MeView,
     # Public
-    MatchListView, MatchDetailView,
+    MatchListView, MatchDetailView, MatchRecommendationView,
     # Client
     BookTicketView, MyTicketsView, TicketDetailView, CancelBookingView, QRRefreshView,
     # Profile & Notifications
@@ -31,6 +31,7 @@ urlpatterns = [
 
     # ── PUBLIC MATCHES ───────────────────────────────────────
     path('matches/',                MatchListView.as_view(),       name='api_match_list'),
+    path('matches/recommendations/',MatchRecommendationView.as_view(), name='api_match_recommendations'),
     path('matches/<int:pk>/',       MatchDetailView.as_view(),     name='api_match_detail'),
 
     # ── CLIENT BOOKINGS ──────────────────────────────────────
