@@ -38,8 +38,6 @@ export default function HomePage() {
   useEffect(() => {
     if (user) {
       setRecLoading(true);
-      // Use location from user profile; fall back to Morocco
-      const country = (user.location || '').trim() || 'Morocco';
       api.get('/matches/recommendations/')
         .then(res => setRecommendations(res.data))
         .catch(() => setRecommendations([]))
@@ -72,36 +70,37 @@ export default function HomePage() {
                 {emoji} {match.sport_display}
               </span>
               {seats === 0
-                ? <span className="badge bg-danger">Sold Out</span>
+                ? <span className="badge" style={{ background: '#fee2e2', color: 'var(--danger)', fontWeight: 700 }}>Sold Out</span>
                 : seats <= 10
-                  ? <span className="badge bg-warning text-dark">Only {seats} left</span>
-                  : <span className="badge" style={{ background: 'rgba(16,185,129,.2)', color: '#34d399' }}>{seats} seats</span>
+                  ? <span className="badge" style={{ background: '#fef9c3', color: '#b45309', fontWeight: 700 }}>Only {seats} left</span>
+                  : <span className="badge" style={{ background: '#dcfce7', color: '#16a34a', fontWeight: 700 }}>{seats} seats</span>
               }
             </div>
 
             {/* Title */}
-            <h5 className="fw-700 mb-1" style={{ fontWeight: 700 }}>{match.title}</h5>
+            <h5 className="fw-700 mb-1" style={{ color: 'var(--text)', fontWeight: 700 }}>{match.title}</h5>
+
             {/* Teams */}
             <p className="mb-3" style={{ color: 'var(--muted)', fontSize: '.9rem' }}>
               <i className="bi bi-people-fill me-1"></i>
-              {match.home_team} <strong style={{ color: '#818cf8' }}>vs</strong> {match.away_team}
+              {match.home_team} <strong style={{ color: 'var(--primary)' }}>vs</strong> {match.away_team}
             </p>
 
             {/* Date / Venue */}
-            <div className="mb-3 d-flex flex-column gap-1" style={{ fontSize: '.85rem', color: 'var(--muted)' }}>
+            <div className="mb-3 d-flex flex-column gap-1" style={{ fontSize: '.84rem', color: 'var(--muted)' }}>
               <span>
-                <i className="bi bi-calendar-event me-1 text-primary"></i>
+                <i className="bi bi-calendar-event me-1" style={{ color: 'var(--primary)' }}></i>
                 {new Date(match.date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })} &bull; {match.time?.slice(0, 5)}
               </span>
               <span>
-                <i className="bi bi-geo-alt-fill me-1 text-primary"></i>
+                <i className="bi bi-geo-alt-fill me-1" style={{ color: 'var(--primary)' }}></i>
                 {match.full_location || match.location}
               </span>
             </div>
 
             {/* Price + CTA */}
             <div className="mt-auto d-flex justify-content-between align-items-center">
-              <span style={{ fontSize: '1.3rem', fontWeight: 800, color: '#818cf8' }}>
+              <span style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--primary)' }}>
                 ${match.price}
               </span>
               <Link to={`/match/${match.id}`} className="btn btn-primary btn-sm px-3">
@@ -119,28 +118,28 @@ export default function HomePage() {
       {/* ══ HERO ══ */}
       <section className="hero">
         <div className="container text-center">
-          <p className="text-uppercase fw-700 mb-2" style={{ color: '#818cf8', letterSpacing: '.12em', fontSize: '.85rem', fontWeight: 700 }}>
-            <i className="bi bi-trophy-fill me-1 text-warning"></i> University Sports
+          <p className="text-uppercase fw-700 mb-2" style={{ color: 'rgba(255,255,255,.8)', letterSpacing: '.12em', fontSize: '.82rem' }}>
+            <i className="bi bi-trophy-fill me-1" style={{ color: 'var(--accent)' }}></i> University Sports
           </p>
           <h1 className="mb-3">
             Book Your Tickets for<br />
             <span>Live Sports Action</span>
           </h1>
-          <p className="lead mb-4" style={{ color: 'var(--muted)', maxWidth: '540px', margin: '0 auto' }}>
-            Football &amp; basketball matches, all in one place.
+          <p className="lead mb-5" style={{ maxWidth: '520px', margin: '0 auto 2rem' }}>
+            Football &amp; basketball matches — all in one place.
             Reserve your seat before they sell out.
           </p>
           {!user ? (
-            <>
-              <Link to="/register" className="btn btn-primary btn-lg me-2 px-4 py-2">
+            <div className="d-flex gap-3 justify-content-center flex-wrap">
+              <Link to="/register" className="btn btn-lg px-5 py-2" style={{ background: '#fff', color: 'var(--primary)', fontWeight: 700, borderRadius: 10, boxShadow: '0 4px 20px rgba(0,0,0,.15)' }}>
                 <i className="bi bi-person-plus me-1"></i> Get Started Free
               </Link>
-              <a href="#matches" className="btn btn-outline-light btn-lg px-4 py-2">
+              <a href="#matches" className="btn btn-lg px-5 py-2" style={{ border: '2px solid rgba(255,255,255,.6)', color: '#fff', borderRadius: 10, background: 'transparent' }}>
                 View Matches
               </a>
-            </>
+            </div>
           ) : (
-            <a href="#matches" className="btn btn-primary btn-lg px-4 py-2">
+            <a href="#matches" className="btn btn-lg px-5 py-2" style={{ background: '#fff', color: 'var(--primary)', fontWeight: 700, borderRadius: 10, boxShadow: '0 4px 20px rgba(0,0,0,.15)' }}>
               <i className="bi bi-search me-1"></i> Browse Matches
             </a>
           )}
@@ -149,17 +148,19 @@ export default function HomePage() {
 
       {/* ══ RECOMMENDED MATCHES ══ */}
       {user && !recLoading && recommendations.length > 0 && (
-        <section className="py-5" style={{ background: 'var(--card-bg)', borderBottom: '1px solid var(--card-border)' }}>
+        <section className="py-5" style={{ background: 'var(--primary-lt)', borderBottom: '1px solid var(--card-border)' }}>
           <div className="container">
-            <h3 className="fw-bold mb-4" style={{ display: 'flex', alignItems: 'center', gap: '.5rem' }}>
-              <i className="bi bi-geo-alt-fill text-danger"></i>
-              Recommended Matches Near You
-              {(user.location || '').trim() && (
-                <span style={{ fontSize: '1rem', fontWeight: 400, color: 'var(--muted)', marginLeft: '.4rem' }}>
-                  ({user.location.trim()})
-                </span>
-              )}
-            </h3>
+            <div className="mb-4">
+              <p className="section-label"><i className="bi bi-geo-alt-fill me-1"></i>Recommended For You</p>
+              <h3 className="fw-bold" style={{ color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '.5rem' }}>
+                Matches Near You
+                {(user.location || '').trim() && (
+                  <span style={{ fontSize: '1rem', fontWeight: 400, color: 'var(--muted)', marginLeft: '.4rem' }}>
+                    — {user.location.trim()}
+                  </span>
+                )}
+              </h3>
+            </div>
             <div className="row g-4">
               {recommendations.map((match, idx) => renderMatchCard(match, idx))}
             </div>
@@ -168,7 +169,7 @@ export default function HomePage() {
       )}
 
       {/* ══ SEARCH / FILTER BAR ══ */}
-      <section className="py-4" style={{ background: 'var(--bg2)', borderBottom: '1px solid var(--card-border)' }}>
+      <section className="search-bar-section">
         <div className="container" id="matches">
           <form onSubmit={handleSearch} className="row g-2 align-items-end">
             <div className="col-12 col-md-6">
@@ -190,7 +191,9 @@ export default function HomePage() {
               </select>
             </div>
             <div className="col-6 col-md-3 d-flex gap-2">
-              <button className="btn btn-primary flex-grow-1" type="submit">Search</button>
+              <button className="btn btn-primary flex-grow-1" type="submit">
+                <i className="bi bi-search me-1"></i>Search
+              </button>
               {(query || sport) && (
                 <button type="button" className="btn btn-outline-light" onClick={handleClear}>Clear</button>
               )}
@@ -213,16 +216,15 @@ export default function HomePage() {
 
           {loading ? (
             <div className="text-center py-5">
-              <div className="spinner-border text-primary" role="status"><span className="visually-hidden">Loading…</span></div>
+              <div className="spinner-border" role="status"><span className="visually-hidden">Loading…</span></div>
             </div>
           ) : matches.length === 0 ? (
-            /* Empty state */
             <div className="text-center py-5">
-              <div style={{ fontSize: '5rem', opacity: .3 }}>🏟️</div>
+              <div style={{ fontSize: '5rem', opacity: .25 }}>🏟️</div>
               <h4 className="mt-3" style={{ color: 'var(--muted)' }}>No matches found</h4>
               <p style={{ color: 'var(--muted)' }}>
                 {(query || sport)
-                  ? <span>Try a different search or <button className="btn btn-link p-0" style={{ color: '#818cf8' }} onClick={handleClear}>clear filters</button>.</span>
+                  ? <span>Try a different search or <button className="btn btn-link p-0" style={{ color: 'var(--primary)' }} onClick={handleClear}>clear filters</button>.</span>
                   : 'No matches are scheduled yet. Check back soon!'}
               </p>
             </div>
@@ -267,29 +269,33 @@ export default function HomePage() {
       {/* ══ SPORT HIGHLIGHTS ══ */}
       <section className="py-5" style={{ background: 'var(--bg2)', borderTop: '1px solid var(--card-border)' }}>
         <div className="container">
+          <div className="text-center mb-4">
+            <p className="section-label">Explore by Sport</p>
+            <h2 className="fw-bold" style={{ color: 'var(--text)' }}>Find Your Game</h2>
+          </div>
           <div className="row g-4">
             <div className="col-12 col-md-6">
-              <div className="card p-4 h-100" style={{ borderColor: 'rgba(52,211,153,.2)' }}>
-                <div style={{ fontSize: '3rem', lineHeight: 1 }}>⚽</div>
-                <h4 className="fw-bold mt-3" style={{ color: '#34d399' }}>Football / Soccer</h4>
+              <div className="card p-4 h-100" style={{ borderLeft: '4px solid #16a34a' }}>
+                <div style={{ fontSize: '2.8rem', lineHeight: 1 }}>⚽</div>
+                <h4 className="fw-bold mt-3" style={{ color: '#15803d' }}>Football / Soccer</h4>
                 <p style={{ color: 'var(--muted)' }}>
                   Watch the best university football teams battle it out on the field.
                   Book your seats now and experience the excitement live!
                 </p>
-                <button className="btn btn-sm btn-success mt-auto" onClick={() => { setSport('football'); setPage(1); document.getElementById('matches')?.scrollIntoView({ behavior: 'smooth' }); }}>
+                <button className="btn btn-success btn-sm mt-auto" onClick={() => { setSport('football'); setPage(1); document.getElementById('matches')?.scrollIntoView({ behavior: 'smooth' }); }}>
                   View Football Matches
                 </button>
               </div>
             </div>
             <div className="col-12 col-md-6">
-              <div className="card p-4 h-100" style={{ borderColor: 'rgba(251,191,36,.2)' }}>
-                <div style={{ fontSize: '3rem', lineHeight: 1 }}>🏀</div>
-                <h4 className="fw-bold mt-3" style={{ color: '#fbbf24' }}>Basketball</h4>
+              <div className="card p-4 h-100" style={{ borderLeft: '4px solid #d97706' }}>
+                <div style={{ fontSize: '2.8rem', lineHeight: 1 }}>🏀</div>
+                <h4 className="fw-bold mt-3" style={{ color: '#b45309' }}>Basketball</h4>
                 <p style={{ color: 'var(--muted)' }}>
                   Cheer for your favourite university basketball squad.
                   Fast-paced, thrilling, and always sold out – get your tickets early!
                 </p>
-                <button className="btn btn-sm btn-warning mt-auto" onClick={() => { setSport('basketball'); setPage(1); document.getElementById('matches')?.scrollIntoView({ behavior: 'smooth' }); }}>
+                <button className="btn btn-warning btn-sm mt-auto" onClick={() => { setSport('basketball'); setPage(1); document.getElementById('matches')?.scrollIntoView({ behavior: 'smooth' }); }}>
                   View Basketball Matches
                 </button>
               </div>

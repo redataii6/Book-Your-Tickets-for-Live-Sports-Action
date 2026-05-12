@@ -51,13 +51,13 @@ export default function AdminDashboardPage() {
             </div>
             <div className="col-6 col-lg-3">
               <div className="stat-card">
-                <div className="stat-num" style={{ color: '#34d399' }}>{stats.total_users}</div>
+                <div className="stat-num" style={{ color: 'var(--success)' }}>{stats.total_users}</div>
                 <div className="stat-label"><i className="bi bi-people-fill me-1"></i>Registered Users</div>
               </div>
             </div>
             <div className="col-6 col-lg-3">
               <div className="stat-card">
-                <div className="stat-num" style={{ color: '#fbbf24' }}>${Number(stats.total_revenue).toFixed(2)}</div>
+                <div className="stat-num" style={{ color: 'var(--warning)' }}>${Number(stats.total_revenue).toFixed(2)}</div>
                 <div className="stat-label"><i className="bi bi-currency-dollar me-1"></i>Total Revenue</div>
               </div>
             </div>
@@ -115,7 +115,7 @@ export default function AdminDashboardPage() {
                       )) : (
                         <tr>
                           <td colSpan="5" className="text-center py-4" style={{ color: 'var(--muted)' }}>
-                            No matches yet. <Link to="/admin/matches/new" style={{ color: '#818cf8' }}>Create one →</Link>
+                            No matches yet. <Link to="/admin/matches/new" style={{ color: 'var(--primary)' }}>Create one →</Link>
                           </td>
                         </tr>
                       )}
@@ -138,14 +138,14 @@ export default function AdminDashboardPage() {
                 <div className="p-3 d-flex flex-column gap-2">
                   {stats.recent_bookings?.length > 0 ? stats.recent_bookings.map(booking => (
                     <div key={booking.id} className="p-3 rounded-3 d-flex justify-content-between align-items-center"
-                         style={{ background: 'rgba(255,255,255,.03)', border: '1px solid var(--card-border)' }}>
+                         style={{ background: 'var(--bg2)', border: '1px solid var(--card-border)', borderRadius: 8 }}>
                       <div>
                         <div className="fw-600" style={{ fontSize: '.85rem' }}>{booking.user?.username}</div>
                         <div style={{ color: 'var(--muted)', fontSize: '.78rem' }}>{booking.match?.title}</div>
-                        <code style={{ color: '#818cf8', fontSize: '.72rem' }}>{booking.booking_ref}</code>
+                        <code style={{ color: 'var(--primary)', fontSize: '.72rem' }}>{booking.booking_ref}</code>
                       </div>
                       <div className="text-end">
-                        <div className="fw-bold" style={{ color: '#fbbf24' }}>${booking.total_price}</div>
+                        <div className="fw-bold" style={{ color: 'var(--success)' }}>${booking.total_price}</div>
                         <span className={`status-pill status-${booking.status}`} style={{ fontSize: '.68rem' }}>
                           {booking.status_display}
                         </span>

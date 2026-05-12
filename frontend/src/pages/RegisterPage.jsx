@@ -25,25 +25,28 @@ export default function RegisterPage() {
     }
   };
 
-  const fieldErr = key => errors[key] ? <div className="text-danger small mt-1">{Array.isArray(errors[key]) ? errors[key][0] : errors[key]}</div> : null;
+  const fieldErr = key => errors[key]
+    ? <div className="text-danger small mt-1">{Array.isArray(errors[key]) ? errors[key][0] : errors[key]}</div>
+    : null;
 
   return (
-    <div className="min-vh-100 d-flex align-items-center justify-content-center py-5"
-         style={{ background: 'linear-gradient(135deg,#0f0f1a,#1e1b4b,#0f0f1a)' }}>
+    <div
+      className="min-vh-100 d-flex align-items-center justify-content-center py-5"
+      style={{ background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 50%, #f0f9ff 100%)' }}
+    >
       <div className="container" style={{ maxWidth: '480px' }}>
 
         {/* Logo */}
         <div className="text-center mb-4">
-          <div style={{ fontSize: '2.5rem' }}>🏆</div>
-          <h1 className="h3 fw-bold mt-2"
-              style={{ background: 'linear-gradient(135deg,#818cf8,#c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+          <div style={{ fontSize: '2.8rem' }}>🏆</div>
+          <h1 className="h3 fw-bold mt-2" style={{ color: 'var(--primary)' }}>
             UniSports Tickets
           </h1>
           <p style={{ color: 'var(--muted)' }}>Create your free account to start booking</p>
         </div>
 
         <div className="card p-4 p-md-5">
-          <h2 className="h5 fw-bold mb-4 text-center">Create Account</h2>
+          <h2 className="h5 fw-bold mb-4 text-center" style={{ color: 'var(--text)' }}>Create Account</h2>
 
           {errors.detail && <div className="alert alert-danger">{errors.detail}</div>}
 
@@ -94,7 +97,7 @@ export default function RegisterPage() {
           <hr style={{ borderColor: 'var(--card-border)', margin: '1.5rem 0' }} />
           <p className="text-center mb-0" style={{ color: 'var(--muted)' }}>
             Already have an account?{' '}
-            <Link to="/login" style={{ color: '#818cf8', fontWeight: 600 }}>Login here</Link>
+            <Link to="/login" style={{ color: 'var(--primary)', fontWeight: 600 }}>Login here</Link>
           </p>
         </div>
 

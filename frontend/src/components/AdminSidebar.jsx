@@ -1,4 +1,4 @@
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function AdminSidebar({ activeItem }) {
@@ -11,12 +11,16 @@ export default function AdminSidebar({ activeItem }) {
     <div className="col-auto sidebar" style={{ width: '240px' }}>
       <div className="text-center mb-4 pt-2">
         <div
-          className="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2"
-          style={{ width: '48px', height: '48px', background: 'linear-gradient(135deg,#ef4444,#b91c1c)', fontSize: '1.2rem', fontWeight: 800 }}
+          className="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2 text-white"
+          style={{
+            width: '48px', height: '48px',
+            background: 'linear-gradient(135deg, var(--danger), #b91c1c)',
+            fontSize: '1.2rem', fontWeight: 800,
+          }}
         >
           {user?.username?.[0]?.toUpperCase()}
         </div>
-        <div className="fw-bold" style={{ fontSize: '.9rem' }}>{user?.username}</div>
+        <div className="fw-bold" style={{ fontSize: '.9rem', color: 'var(--text)' }}>{user?.username}</div>
         <span className="status-pill status-cancelled">Administrator</span>
       </div>
 
@@ -37,10 +41,12 @@ export default function AdminSidebar({ activeItem }) {
         <a href="/admin/" className="nav-link" target="_blank">
           <i className="bi bi-gear-fill"></i> Django Admin
         </a>
-        <Link to="/" className="nav-link"><i className="bi bi-globe"></i> View Site</Link>
+        <Link to="/" className="nav-link">
+          <i className="bi bi-globe"></i> View Site
+        </Link>
         <button
           className="nav-link text-start"
-          style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer' }}
+          style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', width: '100%' }}
           onClick={handleLogout}
         >
           <i className="bi bi-box-arrow-right"></i> Logout

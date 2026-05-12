@@ -44,7 +44,7 @@ export default function ProfilePage() {
 
   if (loading) return (
     <div className="container py-5 text-center">
-      <div className="spinner-border text-primary" role="status"><span className="visually-hidden">Loading…</span></div>
+      <div className="spinner-border" role="status"><span className="visually-hidden">Loading…</span></div>
     </div>
   );
 
@@ -65,24 +65,30 @@ export default function ProfilePage() {
   return (
     <div className="container py-5" style={{ maxWidth: '680px' }}>
 
-      <h1 className="h3 fw-bold mb-4">
-        <i className="bi bi-person-circle me-2" style={{ color: 'var(--accent)' }}></i>
+      <h1 className="h3 fw-bold mb-4" style={{ color: 'var(--text)' }}>
+        <i className="bi bi-person-circle me-2" style={{ color: 'var(--primary)' }}></i>
         My Profile
       </h1>
 
       <div className="card p-4 p-md-5">
 
         {/* Avatar + username */}
-        <div className="d-flex align-items-center gap-4 mb-4 pb-4"
-             style={{ borderBottom: '1px solid var(--card-border)' }}>
+        <div
+          className="d-flex align-items-center gap-4 mb-4 pb-4"
+          style={{ borderBottom: '1px solid var(--card-border)' }}
+        >
           <div
-            className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-            style={{ width: '70px', height: '70px', background: 'linear-gradient(135deg,var(--primary),#7c3aed)', fontSize: '1.8rem', fontWeight: 800 }}
+            className="rounded-circle d-flex align-items-center justify-content-center text-white flex-shrink-0"
+            style={{
+              width: '70px', height: '70px',
+              background: 'linear-gradient(135deg, var(--primary), #1d4ed8)',
+              fontSize: '1.8rem', fontWeight: 800,
+            }}
           >
             {profile?.username?.[0]?.toUpperCase()}
           </div>
           <div>
-            <h2 className="h5 fw-bold mb-0">{fullName}</h2>
+            <h2 className="h5 fw-bold mb-0" style={{ color: 'var(--text)' }}>{fullName}</h2>
             <p className="mb-1" style={{ color: 'var(--muted)' }}>@{profile?.username}</p>
             <span className={rolePillClass(profile?.role)}>
               {roleDisplay(profile?.role)}
@@ -114,7 +120,7 @@ export default function ProfilePage() {
             </div>
             <div className="col-12">
               <label className="form-label">
-                <i className="bi bi-geo-alt me-1" style={{ color: 'var(--accent)' }}></i>
+                <i className="bi bi-geo-alt me-1" style={{ color: 'var(--primary)' }}></i>
                 Location
                 <span style={{ color: 'var(--muted)', fontWeight: 400, fontSize: '.82rem', marginLeft: '.4rem' }}>
                   (country / city — used for match recommendations)
@@ -130,7 +136,7 @@ export default function ProfilePage() {
             </div>
             <div className="col-12">
               <label className="form-label">Bio</label>
-              <textarea className="form-control" name="bio" value={form.bio || ''} onChange={handleChange} />
+              <textarea className="form-control" name="bio" value={form.bio || ''} onChange={handleChange} rows={3} />
             </div>
           </div>
 
@@ -149,19 +155,19 @@ export default function ProfilePage() {
           <Link to="/my-tickets" className="card p-3 text-decoration-none d-flex flex-row align-items-center gap-3">
             <i className="bi bi-ticket-perforated-fill fs-3" style={{ color: 'var(--accent)' }}></i>
             <div>
-              <div className="fw-bold" style={{ fontSize: '.9rem' }}>My Tickets</div>
+              <div className="fw-bold" style={{ fontSize: '.9rem', color: 'var(--text)' }}>My Tickets</div>
               <div style={{ color: 'var(--muted)', fontSize: '.78rem' }}>View your bookings</div>
             </div>
           </Link>
         </div>
         <div className="col-6">
           <Link to="/notifications" className="card p-3 text-decoration-none d-flex flex-row align-items-center gap-3">
-            <i className="bi bi-bell-fill fs-3" style={{ color: '#818cf8' }}></i>
+            <i className="bi bi-bell-fill fs-3" style={{ color: 'var(--primary)' }}></i>
             <div>
-              <div className="fw-bold" style={{ fontSize: '.9rem' }}>Notifications</div>
+              <div className="fw-bold" style={{ fontSize: '.9rem', color: 'var(--text)' }}>Notifications</div>
               <div style={{ color: 'var(--muted)', fontSize: '.78rem' }}>
                 {unreadCount > 0
-                  ? <span style={{ color: '#f87171' }}>{unreadCount} unread</span>
+                  ? <span style={{ color: 'var(--danger)' }}>{unreadCount} unread</span>
                   : 'All caught up'
                 }
               </div>

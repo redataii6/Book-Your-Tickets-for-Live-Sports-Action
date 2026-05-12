@@ -81,7 +81,7 @@ export default function AdminMatchFormPage() {
       {/* Breadcrumb */}
       <nav aria-label="breadcrumb" className="mb-4">
         <ol className="breadcrumb" style={{ background: 'none', padding: 0, fontSize: '.85rem' }}>
-          <li className="breadcrumb-item"><Link to="/admin" style={{ color: '#818cf8' }}>Admin</Link></li>
+          <li className="breadcrumb-item"><Link to="/admin" style={{ color: 'var(--primary)' }}>Admin</Link></li>
           <li className="breadcrumb-item active" style={{ color: 'var(--muted)' }}>{title}</li>
         </ol>
       </nav>
@@ -137,7 +137,7 @@ export default function AdminMatchFormPage() {
             {/* Location: City + Country */}
             <div className="col-12">
               <label className="form-label fw-bold">
-                <i className="bi bi-geo-alt-fill me-1" style={{ color: '#818cf8' }}></i>
+                <i className="bi bi-geo-alt-fill me-1" style={{ color: 'var(--primary)' }}></i>
                 Venue Location
               </label>
             </div>
@@ -173,7 +173,7 @@ export default function AdminMatchFormPage() {
             <div className="col-12">
               <label className="form-label d-flex align-items-center gap-2">
                 📍 Stadium Coordinates
-                <span className="badge" style={{ background: 'rgba(79,70,229,.15)', color: '#818cf8', fontWeight: 500, fontSize: '.7rem' }}>
+                <span className="badge" style={{ background: 'var(--primary-lt)', color: 'var(--primary)', fontWeight: 500, fontSize: '.7rem' }}>
                   Used for the interactive map on the ticket
                 </span>
               </label>
@@ -227,8 +227,8 @@ export default function AdminMatchFormPage() {
 
           {/* Info box */}
           <div className="mt-4 p-3 rounded-3"
-               style={{ background: 'rgba(79,70,229,.08)', border: '1px solid rgba(79,70,229,.2)', fontSize: '.83rem', color: 'var(--muted)' }}>
-            <i className="bi bi-info-circle me-1" style={{ color: '#818cf8' }}></i>
+               style={{ background: 'var(--primary-lt)', border: '1px solid rgba(37,99,235,.2)', fontSize: '.83rem', color: 'var(--text-soft)' }}>
+            <i className="bi bi-info-circle me-1" style={{ color: 'var(--primary)' }}></i>
             After creating, staff managers will be notified to review and publish the match.
             The match will remain <strong>Pending</strong> until a staff member approves it.
           </div>

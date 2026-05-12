@@ -18,10 +18,10 @@ export default function NotificationsPage() {
   };
 
   const typeIconStyle = t => {
-    if (t === 'booking_conf') return { background: 'rgba(16,185,129,.15)', color: '#34d399' };
-    if (t === 'new_match')    return { background: 'rgba(245,158,11,.15)', color: '#fbbf24' };
-    if (t === 'match_pub')    return { background: 'rgba(79,70,229,.15)',  color: '#818cf8' };
-    return { background: 'rgba(148,163,184,.1)', color: '#94a3b8' };
+    if (t === 'booking_conf') return { background: 'rgba(22,163,74,.1)', color: 'var(--success)' };
+    if (t === 'new_match')    return { background: '#fef9c3', color: '#b45309' };
+    if (t === 'match_pub')    return { background: 'var(--primary-lt)',  color: 'var(--primary)' };
+    return { background: 'var(--bg2)', color: 'var(--muted)' };
   };
 
   if (loading) return (
@@ -42,7 +42,7 @@ export default function NotificationsPage() {
         <div className="d-flex flex-column gap-3">
           {notifs.map(notif => (
             <div key={notif.id} className="card p-4"
-                 style={{ borderColor: !notif.is_read ? 'rgba(79,70,229,.4)' : undefined }}>
+                 style={{ borderColor: !notif.is_read ? 'var(--primary)' : undefined, borderLeftWidth: !notif.is_read ? '3px' : '1px' }}>
               <div className="d-flex justify-content-between align-items-start">
 
                 <div className="d-flex gap-3 align-items-start">
@@ -60,7 +60,7 @@ export default function NotificationsPage() {
                       {notif.message}
                     </p>
                     {notif.link && (
-                      <a href={notif.link} style={{ color: '#818cf8', fontSize: '.82rem' }}>
+                      <a href={notif.link} style={{ color: 'var(--primary)', fontSize: '.82rem' }}>
                         <i className="bi bi-arrow-right me-1"></i>Go to page
                       </a>
                     )}
@@ -72,7 +72,7 @@ export default function NotificationsPage() {
                     {new Date(notif.created_at).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                   </div>
                   {!notif.is_read && (
-                    <span className="badge mt-1" style={{ background: 'rgba(79,70,229,.2)', color: '#818cf8' }}>New</span>
+                    <span className="badge mt-1" style={{ background: 'var(--primary-lt)', color: 'var(--primary)' }}>New</span>
                   )}
                 </div>
 

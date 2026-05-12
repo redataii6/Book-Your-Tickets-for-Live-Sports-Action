@@ -67,14 +67,14 @@ function QRWidget({ bookingId, bookingRef }) {
             strokeDasharray={RING_CIRC} strokeDashoffset={dashOffset} />
           <text x={35} y={35} dominantBaseline="middle" textAnchor="middle"
             style={{
-              fill: 'var(--text, #e2e8f0)', fontSize: '14px', fontWeight: '700',
+              fill: 'var(--text)', fontSize: '14px', fontWeight: '700',
               transform: 'rotate(90deg)', transformOrigin: '35px 35px'
             }}>
             {countdown}s
           </text>
         </svg>
         <div className="qr-countdown-text">
-          <i className="bi bi-arrow-clockwise me-1" style={{ color: '#818cf8' }}></i>
+          <i className="bi bi-arrow-clockwise me-1" style={{ color: 'var(--primary)' }}></i>
           Refreshes in <strong>{countdown}s</strong>
         </div>
       </div>
@@ -83,7 +83,7 @@ function QRWidget({ bookingId, bookingRef }) {
       <div className="qr-label">
         <i className="bi bi-shield-check me-1" style={{ color: '#10b981' }}></i>
         Scan at stadium gate<br />
-        <span style={{ fontFamily: 'monospace', fontSize: '.68rem', color: '#818cf8' }}>{bookingRef}</span>
+        <span style={{ fontFamily: 'monospace', fontSize: '.68rem', color: 'var(--primary)' }}>{bookingRef}</span>
       </div>
 
       {/* Error banner */}

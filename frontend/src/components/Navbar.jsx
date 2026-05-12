@@ -9,23 +9,25 @@ export default function Navbar() {
 
   const handleLogout = () => { logout(); navigate('/login'); };
 
-  const isAdmin = user && (user.is_superuser || user.role === 'admin');
-  const isStaff = user && user.role === 'staff';
+  const isAdmin  = user && (user.is_superuser || user.role === 'admin');
+  const isStaff  = user && user.role === 'staff';
   const isClient = user && user.role === 'client';
 
   return (
     <nav className="navbar navbar-expand-lg sticky-top">
       <div className="container">
         <Link className="navbar-brand" to="/">
-          <i className="bi bi-trophy-fill"></i> UniSports<span style={{ WebkitTextFillColor: '#818cf8' }}>Tickets</span>
+          <i className="bi bi-trophy-fill"></i>
+          UniSports<span>Tickets</span>
         </Link>
+
         <button
           className="navbar-toggler border-0"
           type="button"
           aria-label="Toggle navigation"
           onClick={() => setMenuOpen(o => !o)}
         >
-          <i className="bi bi-list text-light fs-4"></i>
+          <i className="bi bi-list" style={{ fontSize: '1.6rem', color: 'var(--text)' }}></i>
         </button>
 
         <div className={`collapse navbar-collapse${menuOpen ? ' show' : ''}`} id="navMenu">
@@ -38,7 +40,7 @@ export default function Navbar() {
 
             {isAdmin && (
               <li className="nav-item">
-                <NavLink className="nav-link" to="/admin">
+                <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/admin">
                   <i className="bi bi-speedometer2"></i> Admin Panel
                 </NavLink>
               </li>
@@ -46,7 +48,7 @@ export default function Navbar() {
 
             {isStaff && (
               <li className="nav-item">
-                <NavLink className="nav-link" to="/staff">
+                <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/staff">
                   <i className="bi bi-kanban-fill"></i> Staff Dashboard
                 </NavLink>
               </li>
@@ -54,7 +56,7 @@ export default function Navbar() {
 
             {isClient && (
               <li className="nav-item">
-                <NavLink className="nav-link" to="/my-tickets">
+                <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/my-tickets">
                   <i className="bi bi-ticket-perforated-fill"></i> My Tickets
                 </NavLink>
               </li>
@@ -82,25 +84,31 @@ export default function Navbar() {
                     aria-expanded="false"
                   >
                     <span
-                      className="rounded-circle d-flex align-items-center justify-content-center"
-                      style={{ width: '34px', height: '34px', background: 'linear-gradient(135deg,var(--primary),#7c3aed)', fontWeight: 700, fontSize: '.85rem' }}
+                      className="rounded-circle d-flex align-items-center justify-content-center text-white"
+                      style={{
+                        width: '34px', height: '34px',
+                        background: 'linear-gradient(135deg, var(--primary), #1d4ed8)',
+                        fontWeight: 700, fontSize: '.85rem',
+                        flexShrink: 0,
+                      }}
                     >
                       {user.username?.[0]?.toUpperCase()}
                     </span>
-                    <span>{user.username}</span>
+                    <span style={{ fontWeight: 600, color: 'var(--text)' }}>{user.username}</span>
                   </a>
-                  <ul
-                    className="dropdown-menu dropdown-menu-end"
-                    style={{ background: 'var(--card)', border: '1px solid var(--card-border)' }}
-                  >
+                  <ul className="dropdown-menu dropdown-menu-end">
                     <li>
-                      <Link className="dropdown-item" to="/profile" style={{ color: 'var(--text)' }}>
+                      <Link className="dropdown-item" to="/profile">
                         <i className="bi bi-person me-2"></i>Profile
                       </Link>
                     </li>
-                    <li><hr className="dropdown-divider" style={{ borderColor: 'var(--card-border)' }} /></li>
+                    <li><hr className="dropdown-divider" /></li>
                     <li>
-                      <button className="dropdown-item text-danger" onClick={handleLogout} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left' }}>
+                      <button
+                        className="dropdown-item"
+                        onClick={handleLogout}
+                        style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', color: 'var(--danger)' }}
+                      >
                         <i className="bi bi-box-arrow-right me-2"></i>Logout
                       </button>
                     </li>
@@ -110,8 +118,8 @@ export default function Navbar() {
             ) : (
               <>
                 <li className="nav-item">
-                  <NavLink className="nav-link" to="/login">
-                    <i className="bi bi-box-arrow-in-right me-1"></i>Login
+                  <NavLink className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} to="/login">
+                    <i className="bi bi-box-arrow-in-right"></i> Login
                   </NavLink>
                 </li>
                 <li className="nav-item">

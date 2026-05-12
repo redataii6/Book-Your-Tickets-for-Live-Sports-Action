@@ -53,7 +53,7 @@ export default function MatchDetailPage() {
       {/* Breadcrumb */}
       <nav aria-label="breadcrumb" className="mb-4">
         <ol className="breadcrumb" style={{ background: 'none', padding: 0, fontSize: '.85rem' }}>
-          <li className="breadcrumb-item"><Link to="/" style={{ color: '#818cf8' }}>Home</Link></li>
+          <li className="breadcrumb-item"><Link to="/" style={{ color: 'var(--primary)' }}>Home</Link></li>
           <li className="breadcrumb-item active" style={{ color: 'var(--muted)' }}>Match Detail</li>
         </ol>
       </nav>
@@ -85,9 +85,9 @@ export default function MatchDetailPage() {
               <h1 className="h2 fw-bold mb-1">{match.title}</h1>
               {/* Teams vs */}
               <p className="fs-5 mb-4" style={{ color: 'var(--muted)' }}>
-                <strong className="text-light">{match.home_team}</strong>
-                <span className="mx-2" style={{ color: '#818cf8' }}>vs</span>
-                <strong className="text-light">{match.away_team}</strong>
+                <strong style={{ color: 'var(--text)' }}>{match.home_team}</strong>
+                <span className="mx-2" style={{ color: 'var(--primary)' }}>vs</span>
+                <strong style={{ color: 'var(--text)' }}>{match.away_team}</strong>
               </p>
 
               {/* Info Grid */}
@@ -99,8 +99,8 @@ export default function MatchDetailPage() {
                   ['bi-people-fill',   match.available_seats,                         'Seats Left'],
                 ].map(([icon, value, label]) => (
                   <div key={label} className="col-6 col-md-3">
-                    <div className="p-3 rounded-3 text-center" style={{ background: 'rgba(79,70,229,.1)' }}>
-                      <i className={`bi ${icon} fs-4 mb-1`} style={{ color: '#818cf8' }}></i>
+                    <div className="p-3 rounded-3 text-center" style={{ background: 'var(--primary-lt)' }}>
+                      <i className={`bi ${icon} fs-4 mb-1`} style={{ color: 'var(--primary)' }}></i>
                       <div className="fw-700" style={{ fontSize: '.95rem' }}>{value}</div>
                       <div style={{ fontSize: '.75rem', color: 'var(--muted)' }}>{label}</div>
                     </div>
@@ -134,7 +134,7 @@ export default function MatchDetailPage() {
               <div className="d-flex justify-content-between align-items-center mb-3 pb-3"
                    style={{ borderBottom: '1px solid var(--card-border)' }}>
                 <span style={{ color: 'var(--muted)' }}>Price per ticket</span>
-                <span style={{ fontSize: '1.6rem', fontWeight: 800, color: '#818cf8' }}>${match.price}</span>
+                <span style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--primary)' }}>${match.price}</span>
               </div>
 
               {/* Available seats bar */}
@@ -145,7 +145,7 @@ export default function MatchDetailPage() {
                 </div>
                 <div className="progress" style={{ height: '8px', background: 'var(--card-border)', borderRadius: '10px' }}>
                   <div className="progress-bar" role="progressbar"
-                       style={{ width: `${pct}%`, background: 'linear-gradient(90deg,#818cf8,#c084fc)' }}>
+                       style={{ width: `${pct}%`, background: 'linear-gradient(90deg, var(--primary), #2563eb)' }}>
                   </div>
                 </div>
               </div>
@@ -155,7 +155,7 @@ export default function MatchDetailPage() {
                   {userBooking ? (
                     /* Already booked */
                     <>
-                      <div className="alert mb-3" style={{ background: 'rgba(16,185,129,.15)', border: '1px solid rgba(16,185,129,.3)', color: '#34d399' }}>
+                      <div className="alert alert-success mb-3">
                         <i className="bi bi-check-circle-fill me-2"></i>
                         You have booked <strong>{userBooking.quantity}</strong> ticket{userBooking.quantity !== 1 ? 's' : ''} for this match!
                       </div>
@@ -165,7 +165,7 @@ export default function MatchDetailPage() {
                     </>
                   ) : match.available_seats === 0 ? (
                     /* Sold out */
-                    <div className="alert" style={{ background: 'rgba(239,68,68,.15)', border: '1px solid rgba(239,68,68,.3)', color: '#f87171' }}>
+                    <div className="alert alert-danger">
                       <i className="bi bi-x-circle-fill me-2"></i> This match is sold out.
                     </div>
                   ) : (

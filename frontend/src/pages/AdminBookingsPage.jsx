@@ -48,7 +48,7 @@ export default function AdminBookingsPage() {
                 <tbody>
                   {bookings.length > 0 ? bookings.map(booking => (
                     <tr key={booking.id}>
-                      <td><code style={{ color: '#818cf8', fontSize: '.78rem' }}>{booking.booking_ref}</code></td>
+                      <td><code style={{ color: 'var(--primary)', fontSize: '.78rem' }}>{booking.booking_ref}</code></td>
                       <td>
                         <div className="fw-600" style={{ fontSize: '.88rem' }}>{booking.user?.username}</div>
                         <small style={{ color: 'var(--muted)' }}>{booking.user?.email || '—'}</small>

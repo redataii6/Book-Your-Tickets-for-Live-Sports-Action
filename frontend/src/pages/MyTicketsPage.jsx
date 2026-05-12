@@ -49,7 +49,7 @@ export default function MyTicketsPage() {
 
                   {/* Ref + Status */}
                   <div className="d-flex justify-content-between align-items-center mb-3">
-                    <code style={{ color: '#818cf8', fontSize: '.8rem' }}>{booking.booking_ref}</code>
+                    <code style={{ color: 'var(--primary)', fontSize: '.8rem' }}>{booking.booking_ref}</code>
                     <span className={`status-pill status-${booking.status}`}>
                       {booking.status_display}
                     </span>
@@ -83,7 +83,7 @@ export default function MyTicketsPage() {
 
                   <div className="mt-auto d-flex justify-content-between align-items-center pt-3"
                        style={{ borderTop: '1px solid var(--card-border)' }}>
-                    <span style={{ fontSize: '1.2rem', fontWeight: 800, color: '#818cf8' }}>
+                    <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--primary)' }}>
                       ${booking.total_price}
                     </span>
                     <div className="d-flex gap-2">
